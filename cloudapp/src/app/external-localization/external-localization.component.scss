@@ -1,0 +1,14 @@
+$table: table;
+$tableRow: table-row;
+$tableCell: table-cell;
+
+
+div.table{
+  display:$table;
+}
+div.table-row{
+  display:$tableRow;
+}
+p.table-cell, a.table-cell {
+  display: $tableCell;
+}

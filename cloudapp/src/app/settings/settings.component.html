@@ -1,0 +1,51 @@
+<app-topmenu>
+  <div buttons>
+    <button mat-flat-button type="button" color="primary" (click)="save()" [disabled]="!(form?.dirty)">Save</button>
+  </div>
+</app-topmenu>
+<div class="loading-shade" *ngIf="saving">
+  <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
+</div>
+<div *ngIf="form">
+  <form [formGroup]="form">
+    <mat-divider></mat-divider>
+    <h2 class="subheading-1">External localization</h2>
+    <mat-icon class="info-icon" (click)="openDialog()" color="primary">info</mat-icon>
+    <p>A template for searching in the External Localization part of the app can be created here</p>
+    <p>https://test.netpunkt.dk/search/work?search_block_form=term.default+adj+%22A+%C2%<b>A4concise+history+of+Finland</b>%22&page_id=danbib-search</p>
+    <section class="settings-section">
+      <label class="example-margin">Search Criteria</label>
+      <mat-radio-group formControlName="searchCriteria">
+        <mat-radio-button class="settings-control" value="ISBN">Isbn</mat-radio-button>
+        <mat-radio-button class="settings-control" value="TITLE">Title</mat-radio-button>
+        <mat-radio-button class="settings-control" value="MMS_ID">MmsId</mat-radio-button>
+      </mat-radio-group>
+    </section>
+    <section>
+      <mat-form-field matInput>
+        <mat-label>Start or url</mat-label>
+        <input matNativeControl formControlName="partOfUrlBeforeSearchCriteria" >
+      </mat-form-field>
+    </section>
+    <section>
+      <mat-form-field matInput>
+        <mat-label >End of url</mat-label>
+        <input matNativeControl formControlName="partOfUrlAfterSearchCriteria" >
+      </mat-form-field>
+    </section>
+    <mat-divider></mat-divider>
+    <h2 class="subheading-1">Additional settings</h2>
+    <section class="settings-section">
+      <label class="example-margin">Align:</label>
+      <mat-radio-group formControlName="pageSize">
+        <mat-radio-button class="settings-control" [value]="5">5</mat-radio-button>
+        <mat-radio-button class="settings-control" [value]="10">10</mat-radio-button>
+        <mat-radio-button class="settings-control" [value]="20">20</mat-radio-button>
+      </mat-radio-group>
+    </section>
+    <section class="settings-section">
+      <mat-checkbox labelPosition="before" formControlName="showValue">Show Value</mat-checkbox>
+    </section>
+  </form>
+  <pre *ngIf="form.get('showValue').value">{{ form.value | json }}</pre>
+</div>
