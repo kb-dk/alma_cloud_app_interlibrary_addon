@@ -5,9 +5,19 @@
     <div [ngClass]="'table-row'" *ngFor="let netpunkEntry of netpunktEntries">
       <p [ngClass]="'table-cell'">{{netpunkEntry.getEntryNo()}}</p>
       <p [ngClass]="'table-cell'" sty>{{netpunkEntry.title | truncate : 20}}</p>
+<!--
+      <ng-container [ngSwitch]="externalLinkTemplate?.searchCriteria" ]>
+        <a *ngSwitchCase="SearchCriteria.TITLE"></a>
+      </ng-container>
+-->
+      <a *ngIf="externalLinkTemplate.searchCriteria=='Title'" target="netpunkt" href="{{externalLinkTemplate.partOfUrlBeforeSearchCriteria}}+{{netpunkEntry.title}}+{{externalLinkTemplate.partOfUrlAfterSearchCriteria}}">Titel-link</a>
+      <a *ngIf="externalLinkTemplate.searchCriteria=='Isbn'" target="netpunkt" href="{{externalLinkTemplate.partOfUrlBeforeSearchCriteria}}+{{netpunkEntry.isbn}}+{{externalLinkTemplate.partOfUrlAfterSearchCriteria}}">Isbn-link</a>
+      <a *ngIf="externalLinkTemplate.searchCriteria=='MmsId'" target="netpunkt" href="{{externalLinkTemplate.partOfUrlBeforeSearchCriteria}}+{{netpunkEntry.mms_id}}+{{externalLinkTemplate.partOfUrlAfterSearchCriteria}}">MmsId-link </a><br>
+<!--
       <a href="{{netpunkEntry.titleLink}}" target="netpunkt">Netpunkt <b>titel</b></a><br>
       <a href="{{netpunkEntry.mmsidLink}}" target="netpunkt">Netpunkt <b>mmsId</b></a><br>
       <a href="{{netpunkEntry.getLink('KVK')}}" target="netpunkt">KVK <b>KVK</b>({{netpunkEntry.isbn}})</a><br>
+-->
     </div>
   </div>
 </div>

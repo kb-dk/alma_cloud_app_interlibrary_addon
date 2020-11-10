@@ -1,10 +1,18 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
 import { AppService } from '../app.service';
-import { Entity, CloudAppEventsService, CloudAppRestService} from '@exlibris/exl-cloudapp-angular-lib';
+import {
+  Entity,
+  CloudAppEventsService,
+  CloudAppRestService,
+  CloudAppSettingsService
+} from '@exlibris/exl-cloudapp-angular-lib';
 import {from, Subscription, throwError} from 'rxjs';
 import { NetpunktEntry } from "./netpunktEntry";
 import {catchError, concatMap, map} from "rxjs/operators";
 import {ExternalLocalizationService} from "./external-localization.service";
+import {Settings} from "../models/settings";
+import {ExternalLinkTemplate} from "../models/externalLinkTemplate";
+import {SearchCriteria} from "../models/externalLinkTemplate";
 
 @Component({
   selector: 'app-external-localization',
@@ -13,15 +21,19 @@ import {ExternalLocalizationService} from "./external-localization.service";
 })
 
 export class ExternalLocalizationComponent implements OnInit {
+  @Input()
   private pageLoad$: Subscription;
   private pageLoaded:boolean = false;
   ids = new Set<string>();
   entities: Entity[];
   netpunktEntries: NetpunktEntry[]=[];
+  private settings: Settings;
+  private externalLinkTemplate: ExternalLinkTemplate;
 
   constructor(private restService: CloudAppRestService,
               private appService: AppService,
               private eventsService: CloudAppEventsService,
+              private settingsService: CloudAppSettingsService,
               private externalLocationService: ExternalLocalizationService){
   }
 
@@ -30,20 +42,9 @@ export class ExternalLocalizationComponent implements OnInit {
     this.onInit();
   }
 
-  private onInitTest() {
-    let $srcArray = from([1, 2, 3, 4]);
-    let subscription =  $srcArray
-          .pipe(map(val => { return val * 2}))
-          .subscribe(val => { console.log(val)});
-    console.log("before: " + subscription);
-    subscription.unsubscribe();
-    console.log("after: " + subscription);
-
-  }
-
-//**********************************************************************************
 
   private onInit() {
+    this.getSettings();
     this.pageLoad$ = this.eventsService.onPageLoad(pageInfo => {
       this.pageLoaded = false;
       var $retrieveLinkAttributes = from (pageInfo.entities).pipe(
@@ -67,7 +68,16 @@ export class ExternalLocalizationComponent implements OnInit {
   }
 
 
-  ///bibs/99122212568805763/requests/17242965100005763
+  private getSettings() {
+    this.settingsService.get().subscribe(settings => {
+      let tmpSettings = settings as Settings;
+      let externalLinkTemplate: ExternalLinkTemplate = new ExternalLinkTemplate(tmpSettings.searchCriteria, tmpSettings.partOfUrlBeforeSearchCriteria, tmpSettings.partOfUrlAfterSearchCriteria);
+      this.externalLinkTemplate = externalLinkTemplate;
+      this.settings = settings as Settings;//TODO: skal måske ikke bruges, hvis ovenstående kan virke.
+    });
+  }
+
+///bibs/99122212568805763/requests/17242965100005763
   private getRequestFromAlma = link => {
     return this.restService.call(link);
   }
@@ -97,5 +107,17 @@ export class ExternalLocalizationComponent implements OnInit {
     if (event.checked) this.ids.add(event.mmsId);
     else this.ids.delete(event.mmsId);
   }
+
+  private onInitTest() {//TODO: Bare testkode
+    let $srcArray = from([1, 2, 3, 4]);
+    let subscription =  $srcArray
+        .pipe(map(val => { return val * 2}))
+        .subscribe(val => { console.log(val)});
+    console.log("before: " + subscription);
+    subscription.unsubscribe();
+    console.log("after: " + subscription);
+
+  }
+
 
 }

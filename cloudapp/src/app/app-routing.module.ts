@@ -3,13 +3,13 @@ import { Routes, RouterModule } from '@angular/router';
 import { MainComponent } from './main/main.component';
 import {ExternalLocalizationComponent} from "./external-localization/external-localization.component";
 import {SettingsComponent} from "./settings/settings.component";
+import {ConfigComponent} from "./config/config.component";
 
 const routes: Routes = [
   { path: '', component: MainComponent },
   { path: 'external-localization', component: ExternalLocalizationComponent },
   { path: 'settings', component: SettingsComponent },
-
-
+  { path: 'config', component: ConfigComponent },
 ];
 
 @NgModule({

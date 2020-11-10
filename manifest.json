@@ -15,5 +15,11 @@
    "fullscreen": {
       "allow": true,
       "open": false
+   },
+   "contentSecurity": {
+      "sandbox": {
+         "popups": true,
+         "modals": true
+      }
    }
 }

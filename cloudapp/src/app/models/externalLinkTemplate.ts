@@ -3,10 +3,14 @@ export class ExternalLinkTemplate {
     partOfUrlBeforeSearchCriteria: string;
     partOfUrlAfterSearchCriteria: string;
 
-    constructor(searchCriteria?:SearchCriteria, uriPartOne?:string, uriPartTwo?:string) {
-        this.searchCriteria = searchCriteria || SearchCriteria.NONE;
+    constructor(searchCriteria?:string, uriPartOne?:string, uriPartTwo?:string) {
+        let test: SearchCriteria = SearchCriteria[searchCriteria];
+        this.searchCriteria = test || SearchCriteria.NONE;
         this.partOfUrlBeforeSearchCriteria = uriPartOne || '';
         this.partOfUrlAfterSearchCriteria = uriPartTwo || '';
+        console.log('string: ' + searchCriteria)
+        console.log('Enum: ' + this.searchCriteria)
+        console.log('Enum string : ' + SearchCriteria[this.searchCriteria]);
     }
 
 }

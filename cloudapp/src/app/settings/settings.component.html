@@ -6,11 +6,17 @@
 <div class="loading-shade" *ngIf="saving">
   <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
 </div>
+<ng-template #emptyList>
+  <div id="emptyList">
+    <span class="uxf-icon uxf-list" style="font-size: 3em;"></span>
+    <div>Add items to the list.</div>
+  </div>
+</ng-template>
 <div *ngIf="form">
   <form [formGroup]="form">
     <mat-divider></mat-divider>
     <h2 class="subheading-1">External localization</h2>
-    <mat-icon class="info-icon" (click)="openDialog()" color="primary">info</mat-icon>
+<!--    <mat-icon class="info-icon" (click)="openDialog()" color="primary">info</mat-icon>-->
     <p>A template for searching in the External Localization part of the app can be created here</p>
     <p>https://test.netpunkt.dk/search/work?search_block_form=term.default+adj+%22A+%C2%<b>A4concise+history+of+Finland</b>%22&page_id=danbib-search</p>
     <section class="settings-section">

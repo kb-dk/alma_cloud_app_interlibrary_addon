@@ -20,8 +20,7 @@ export class SettingsComponent implements OnInit {
     private appService: AppService,
     private settingsService: CloudAppSettingsService,
     private toastr: ToastrService,
-    private dialog: MatDialog
-  ) { }
+    ) { }
 
   ngOnInit() {
     this.appService.setTitle('Settings');
@@ -45,16 +44,6 @@ export class SettingsComponent implements OnInit {
       err => this.toastr.error(err.message),
       ()  => this.saving = false
     );
-  }
-
-
-  openDialog() {
-
-    const dialogConfig = new MatDialogConfig();
-
-    dialogConfig.disableClose = true;
-    dialogConfig.autoFocus = true;
-//    this.dialog.open(CourseDialogComponent, dialogConfig);
   }
 
 }

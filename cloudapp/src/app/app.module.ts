@@ -8,13 +8,15 @@ import { ToastrModule } from 'ngx-toastr';
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 import { MainComponent } from './main/main.component';
-import {TruncatePipe} from "./pipes/truncate.pipe";
-import {ExternalLocalizationComponent} from "./external-localization/external-localization.component";
-import {TopmenuComponent} from "./topmenu/topmenu.component";
-import {SettingsComponent} from "./settings/settings.component";
-import {UpdateRequestComponent} from "./update-request/update-request.component";
-import {FormsModule, ReactiveFormsModule} from "@angular/forms";
-import {ExternalLocalizationService} from "./external-localization/external-localization.service";
+import { TruncatePipe } from "./pipes/truncate.pipe";
+import { ExternalLocalizationComponent } from "./external-localization/external-localization.component";
+import { TopmenuComponent } from "./topmenu/topmenu.component";
+import { SettingsComponent } from "./settings/settings.component";
+import { UpdateRequestComponent } from "./update-request/update-request.component";
+import { FormsModule, ReactiveFormsModule } from "@angular/forms";
+import { ExternalLocalizationService } from "./external-localization/external-localization.service";
+import { ConfigComponent } from './config/config.component';
+import { SettingsDialogComponent } from './settings-dialog/settings-dialog.component';
 
 export function getToastrModule() {
   return ToastrModule.forRoot({
@@ -31,8 +33,12 @@ export function getToastrModule() {
     SettingsComponent,
     ExternalLocalizationComponent,
     UpdateRequestComponent,
-    TruncatePipe
-
+    TruncatePipe,
+    ConfigComponent,
+    SettingsDialogComponent
+  ],
+  entryComponents: [
+    SettingsDialogComponent
   ],
   imports: [
     MaterialModule,
