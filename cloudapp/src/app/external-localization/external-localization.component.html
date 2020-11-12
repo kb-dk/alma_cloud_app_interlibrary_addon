@@ -1,6 +1,6 @@
 <app-topmenu></app-topmenu>
 <p>Use the links following the titles below to search for the material externally </p>
-<div *ngIf="netpunktEntries.length>0 else noEntities">
+<div *ngIf="settings.items.length>0 else noEntities">
   <div [ngClass]="'table'">
     <div [ngClass]="'table-row'" *ngFor="let netpunkEntry of netpunktEntries">
       <p [ngClass]="'table-cell'">{{netpunkEntry.getEntryNo()}}</p>

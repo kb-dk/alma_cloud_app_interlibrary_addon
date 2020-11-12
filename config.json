@@ -1,0 +1,7 @@
+{
+   "title": "Interlibrary Add-on",
+   "description": "Adding extra functionality related to interlibrary activities - e.g. external localisation of materials. ",
+   "env": "https://kbdk-kgl-psb.alma.exlibrisgroup.com/institution/45KBDK_KGL",
+   "port": 4200,
+   "name": "interlibrary-add-on"
+}
