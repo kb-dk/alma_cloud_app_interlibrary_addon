@@ -1,7 +1,9 @@
+import {Injectable} from "@angular/core";
 import {CloudAppRestService, Entity} from "@exlibris/exl-cloudapp-angular-lib";
-
 import {from, throwError} from "rxjs";
 import {concatMap, map} from "rxjs/operators";
+
+@Injectable()
 
 export class ExternalLocalizationService {
 
