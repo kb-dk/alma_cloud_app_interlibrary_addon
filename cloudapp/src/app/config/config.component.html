@@ -1,0 +1,25 @@
+<p>config works!</p>
+<div class="loading-shade" *ngIf="loading">
+    <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
+</div>
+<button class="btn btn-default" type="button">
+    <span aria-hidden="true" class="glyphicon glyphicon-star"></span> Star
+</button>
+<button mat-raised-button (click)="openDialog()">Pick one</button>
+<div *ngIf="items.length>0 else noItems">
+    <mat-list *ngFor="let item of items">
+        <mat-list-item>
+            <mat-icon matListIcon>edit</mat-icon>
+            <span>{{item.partOfUrlBeforeSearchCriteria}}</span>
+            <i class="uxf-icon uxf-close eca-button" (click)="remove(item)">delete</i>
+            <mat-icon matListIcon (click)="remove(item)">delete</mat-icon>
+        </mat-list-item>
+    </mat-list>
+</div>
+<ng-template #noItems>
+    <div id="emptyList">
+        <span class="uxf-icon uxf-list" style="font-size: 3em;"></span>
+        <div>Add items to the list.</div>
+    </div>
+</ng-template>
+
