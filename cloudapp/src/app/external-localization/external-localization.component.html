@@ -5,18 +5,18 @@
     <div [ngClass]="'table-row'" *ngFor="let netpunkEntry of netpunktEntries">
       <p [ngClass]="'table-cell'">{{netpunkEntry.getEntryNo()}}</p>
       <p [ngClass]="'table-cell'" sty>{{netpunkEntry.title | truncate : 20}}</p>
-<!--
-      <ng-container [ngSwitch]="externalLinkTemplate?.searchCriteria" ]>
-        <a *ngSwitchCase="SearchCriteria.TITLE"></a>
-      </ng-container>
--->
+      <mat-list *ngFor="let item of settings.items">
+        <mat-list-item>
+          <a *ngIf="item.searchCriteria=='TITLE'" target="netpunkt" href="{{item.partOfUrlBeforeSearchCriteria}}+{{netpunkEntry.title}}+{{item.partOfUrlAfterSearchCriteria}}">{{item.linkName}}</a><br>
+          <a *ngIf="item.searchCriteria=='ISBN'" target="netpunkt" href="{{item.partOfUrlBeforeSearchCriteria}}+{{netpunkEntry.isbn}}+{{item.partOfUrlAfterSearchCriteria}}">{{item.linkName}}</a><br>
+          <a *ngIf="item.searchCriteria=='MMS_ID'" target="netpunkt" href="{{item.partOfUrlBeforeSearchCriteria}}+{{netpunkEntry.mms_id}}+{{item.partOfUrlAfterSearchCriteria}}">{{item.linkName}}</a><br>
+        </mat-list-item>
+      </mat-list>
+
+      <!--
       <a *ngIf="externalLinkTemplate.searchCriteria=='Title'" target="netpunkt" href="{{externalLinkTemplate.partOfUrlBeforeSearchCriteria}}+{{netpunkEntry.title}}+{{externalLinkTemplate.partOfUrlAfterSearchCriteria}}">Titel-link</a>
       <a *ngIf="externalLinkTemplate.searchCriteria=='Isbn'" target="netpunkt" href="{{externalLinkTemplate.partOfUrlBeforeSearchCriteria}}+{{netpunkEntry.isbn}}+{{externalLinkTemplate.partOfUrlAfterSearchCriteria}}">Isbn-link</a>
       <a *ngIf="externalLinkTemplate.searchCriteria=='MmsId'" target="netpunkt" href="{{externalLinkTemplate.partOfUrlBeforeSearchCriteria}}+{{netpunkEntry.mms_id}}+{{externalLinkTemplate.partOfUrlAfterSearchCriteria}}">MmsId-link </a><br>
-<!--
-      <a href="{{netpunkEntry.titleLink}}" target="netpunkt">Netpunkt <b>titel</b></a><br>
-      <a href="{{netpunkEntry.mmsidLink}}" target="netpunkt">Netpunkt <b>mmsId</b></a><br>
-      <a href="{{netpunkEntry.getLink('KVK')}}" target="netpunkt">KVK <b>KVK</b>({{netpunkEntry.isbn}})</a><br>
 -->
     </div>
   </div>

@@ -1,8 +1,49 @@
 <app-topmenu>
   <div buttons>
-    <button mat-flat-button type="button" color="primary" (click)="save()" [disabled]="!(form?.dirty)">Save</button>
+    <button mat-flat-button type="button" color="primary" (click)="openDialog()" [disabled]="dialogOpen">Add link</button>
   </div>
 </app-topmenu>
+
+<div class="loading-shade" *ngIf="loading else loaded">
+  <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
+</div>
+
+<ng-template #loaded>
+  <h2 class="subheading-1">External localization settings</h2>
+  <p>This is the settings for adding, editing and removing localisation-links</p>
+<!--
+  <p>settings{{settings}}</p>
+  <p>items{{settings.items}}</p>
+  <button class="btn btn-default" type="button">
+    <span aria-hidden="true" class="glyphicon glyphicon-star"></span> Star
+  </button>
+  <button mat-raised-button (click)="openDialog()">Add link</button>
+-->
+<!--  <div *ngIf="!settings || settings.items.length>0 else noItems">-->
+    <mat-list *ngFor="let item of settings.items">
+      <mat-list-item>
+        <mat-icon matListIcon>edit</mat-icon>
+        <span>{{item.linkName}}</span>
+<!-- Exlibris way. Fungerer ikke       <i class="uxf-icon uxf-close eca-button" (click)="remove(item)">delete</i>-->
+        <mat-icon matListIcon (click)="remove(item)">delete</mat-icon>
+      </mat-list-item>
+    </mat-list>
+<!--  </div>-->
+  <ng-template #noItems>
+    <div id="emptyList">
+      <span class="uxf-icon uxf-list" style="font-size: 3em;"></span>
+      <div>Add items to the list.</div>
+    </div>
+  </ng-template>
+</ng-template>
+
+
+
+
+
+
+<!--
+
 <div class="loading-shade" *ngIf="saving">
   <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
 </div>
@@ -16,7 +57,6 @@
   <form [formGroup]="form">
     <mat-divider></mat-divider>
     <h2 class="subheading-1">External localization</h2>
-<!--    <mat-icon class="info-icon" (click)="openDialog()" color="primary">info</mat-icon>-->
     <p>A template for searching in the External Localization part of the app can be created here</p>
     <p>https://test.netpunkt.dk/search/work?search_block_form=term.default+adj+%22A+%C2%<b>A4concise+history+of+Finland</b>%22&page_id=danbib-search</p>
     <section class="settings-section">
@@ -55,3 +95,4 @@
   </form>
   <pre *ngIf="form.get('showValue').value">{{ form.value | json }}</pre>
 </div>
+-->

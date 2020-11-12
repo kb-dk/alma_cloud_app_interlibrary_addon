@@ -6,6 +6,6 @@ export class Settings {
   searchCriteria: string = 'None' ;
   partOfUrlBeforeSearchCriteria: string = '';
   partOfUrlAfterSearchCriteria: string = '';
+  items: ExternalLinkTemplate[] = [];
 
-  // externalLinkTemplate: ExternalLinkTemplate = new ExternalLinkTemplate();
 }
