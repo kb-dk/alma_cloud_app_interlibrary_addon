@@ -7,8 +7,29 @@ div.table{
   display:$table;
 }
 div.table-row{
-  display:$tableRow;
+  display: $tableRow;
 }
-p.table-cell, a.table-cell {
+.table-cell {
   display: $tableCell;
+  padding-left: 0px;
 }
+
+/*
+.mat-list-base {
+  padding-top: 0px;
+  display: inline-flex;
+}
+*/
+
+.mat-list-base.inline-list {
+  display: flex;
+}
+
+/*
+.mat-list-item-content {
+  padding: 0 10px;
+  border-color: #474747;
+  border-width: 1px;
+  border-style: solid;
+}
+*/

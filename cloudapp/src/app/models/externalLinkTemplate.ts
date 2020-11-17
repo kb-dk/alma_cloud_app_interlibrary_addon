@@ -1,23 +1,24 @@
 export class ExternalLinkTemplate {
-    linkName: string;
     id: number;
+    linkName: string;
     searchCriteria: SearchCriteria;
     partOfUrlBeforeSearchCriteria: string;
     partOfUrlAfterSearchCriteria: string;
 
-    constructor(linkname?: string, searchCriteria?:string, uriPartOne?:string, uriPartTwo?:string) {
+    constructor(linkname?: string, searchCriteria?:string, partOfUrlBeforeSearchCriteria?:string, partOfUrlAfterSearchCriteria?:string) {
         this.linkName = linkname || '';
-        this.id = new Date().getMilliseconds();//'Unik' id
+        this.id = new Date().getMilliseconds();//'Unique' id
         let test: SearchCriteria = SearchCriteria[searchCriteria];
         this.searchCriteria = test || SearchCriteria.NONE;
-        this.partOfUrlBeforeSearchCriteria = uriPartOne || '';
-        this.partOfUrlAfterSearchCriteria = uriPartTwo || '';
+        this.partOfUrlBeforeSearchCriteria = partOfUrlBeforeSearchCriteria || '';
+        this.partOfUrlAfterSearchCriteria = partOfUrlAfterSearchCriteria || '';
     }
 }
 
 export enum SearchCriteria {
-    NONE = "None",
-    ISBN = "Isbn",
-    TITLE = "Title",
-    MMS_ID = "MmsId"
+    NONE = 0,
+    ISBN = 1,
+    TITLE = 2,
+    MMS_ID = 3,
+    AUTHOR = 4
 }

@@ -6,13 +6,11 @@ import {
   CloudAppRestService,
   CloudAppSettingsService
 } from '@exlibris/exl-cloudapp-angular-lib';
-import {from, Subscription, throwError} from 'rxjs';
-import { NetpunktEntry } from "./netpunktEntry";
-import {catchError, concatMap, map} from "rxjs/operators";
-import {ExternalLocalizationService} from "./external-localization.service";
-import {Settings} from "../models/settings";
-import {ExternalLinkTemplate} from "../models/externalLinkTemplate";
-import {SearchCriteria} from "../models/externalLinkTemplate";
+import { from, Subscription, throwError} from 'rxjs';
+import { AttributesFromAlma } from "./attributesFromAlma";
+import { map } from "rxjs/operators";
+import { ExternalLocalizationService } from "./external-localization.service";
+import { Settings } from "../models/settings";
 
 @Component({
   selector: 'app-external-localization',
@@ -24,11 +22,9 @@ export class ExternalLocalizationComponent implements OnInit {
   @Input()
   private pageLoad$: Subscription;
   private pageLoaded:boolean = false;
-  ids = new Set<string>();
   entities: Entity[];
-  netpunktEntries: NetpunktEntry[]=[];
+  attributesFromAlmaArray: AttributesFromAlma[]=[];
   private settings: Settings;
-  private externalLinkTemplate: ExternalLinkTemplate;
 
   constructor(private restService: CloudAppRestService,
               private appService: AppService,
@@ -39,41 +35,38 @@ export class ExternalLocalizationComponent implements OnInit {
 
   ngOnInit() {
     this.appService.setTitle('External localization');
-    this.onInit();
+    this.getSettings();
+    this.getBibAttributes();
   }
 
 
-  private onInit() {
-    this.getSettings();
+  private getBibAttributes() {
     this.pageLoad$ = this.eventsService.onPageLoad(pageInfo => {
       this.pageLoaded = false;
-      var $retrieveLinkAttributes = from (pageInfo.entities).pipe(
+      var $retrieveLinkAttributes = from(pageInfo.entities).pipe(
           map((entity, index) => {
-            this.getRequestFromAlma(entity.link).subscribe(result =>{
+            //TODO JJEG: Mangler tjek for om hentede attributter findes (catchError block)
+            //Brug evt. concatMap
+            this.getRequestFromAlma(entity.link).subscribe(result => {
               let mmsId = result.mms_id;
               let title = result.title;
-              let isbn;
               if (mmsId) {
-                this.getBibrecordFromAlma(mmsId).subscribe(bibRecord => {
-                  isbn = bibRecord.isbn;
-                  let tmpNetpunktEntry =  this.addNewNetpunktEntry(title, mmsId, index);
-                  tmpNetpunktEntry.setIsbn(isbn);
+                this.getBibrecordFromAlma(mmsId).subscribe(bibRecord => {//isbn exist only on another Alma API
+                  let isbn = bibRecord.isbn ;
+                  let author = bibRecord.author;
+                  let tmpNetpunktEntry = this.addNewNetpunktEntry(index, title, mmsId, isbn, author );
                 })
               }
             })
           })
       );
-      let subscription =  $retrieveLinkAttributes.subscribe();
-      });
+      let subscription = $retrieveLinkAttributes.subscribe();
+    });
   }
-
 
   private getSettings() {
     this.settingsService.get().subscribe(settings => {
-      let tmpSettings = settings as Settings;
-      let externalLinkTemplate: ExternalLinkTemplate = new ExternalLinkTemplate(tmpSettings.searchCriteria, tmpSettings.partOfUrlBeforeSearchCriteria, tmpSettings.partOfUrlAfterSearchCriteria);
-      this.externalLinkTemplate = externalLinkTemplate;
-      this.settings = settings as Settings;//TODO: skal måske ikke bruges, hvis ovenstående kan virke.
+      this.settings = settings as Settings;
     });
   }
 
@@ -89,25 +82,18 @@ export class ExternalLocalizationComponent implements OnInit {
   }
 
 
-  private addNewNetpunktEntry(title: string, mms_id:string, index: number) {
-    let netpunktTitleLink = 'http://test.netpunkt.dk/search/work?search_block_form=term.default+adj+' + '%22' + title + '%22' + '&page_id=danbib-search'
-    let netpunktMmsidLink = 'http://test.netpunkt.dk/search/work?search_block_form=term.default+adj+' + '%22' + mms_id + '%22' + '&page_id=danbib-search'
-    let netpunktEntry = new NetpunktEntry(index, title, mms_id, netpunktTitleLink, netpunktMmsidLink);
-    this.netpunktEntries.push(netpunktEntry);
+  private addNewNetpunktEntry( index: number, title: string, mms_id:string, isbn:string,  author:string) {
+    let netpunktEntry = new AttributesFromAlma(index, title, mms_id, isbn, author);
+    this.attributesFromAlmaArray.push(netpunktEntry);
     return netpunktEntry;
   }
-
-
 
   ngOnDestroy(): void {
     this.pageLoad$.unsubscribe();
   }
 
-  onEntitySelected(event) {
-    if (event.checked) this.ids.add(event.mmsId);
-    else this.ids.delete(event.mmsId);
-  }
 
+/*
   private onInitTest() {//TODO: Bare testkode
     let $srcArray = from([1, 2, 3, 4]);
     let subscription =  $srcArray
@@ -118,6 +104,7 @@ export class ExternalLocalizationComponent implements OnInit {
     console.log("after: " + subscription);
 
   }
+*/
 
 
 }
