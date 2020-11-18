@@ -35,7 +35,7 @@
         <input matInput [(ngModel)]="data.partOfUrlAfterSearchCriteria"  (change)="onChange()">
     </mat-form-field>
 </div>
-<a *ngIf="readyForSaving != '' && this.data.searchCriteria>0" href="{{testlink}}" target="externalLocalization" >Test link</a>
+<a *ngIf="readyForSaving != '' && this.data.searchCriteria>0" href="{{testlink}}" target="externalLocalization" ><b>Test link</b></a>
 <div mat-dialog-actions>
     <button mat-button (click)="onCloseClick()">Close</button>
     <button mat-button [mat-dialog-close]="data" [disabled]="!readyForSaving">Ok</button>

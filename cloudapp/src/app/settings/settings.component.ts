@@ -67,8 +67,11 @@ export class SettingsComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(result => {
       this.dialogOpen = false;
-      this.settings.items.push(result);
-      this.saveSettings('Localization-link: ' + result.linkName + ' saved to settings.');
+      const readyForSaving = result.searchCriteria>0 && result.linkName != '' && result.partOfUrlBeforeSearchCriteria != ''
+      if (readyForSaving) {
+        this.settings.items.push(result);
+        this.saveSettings('Localization-link: ' + result.linkName + ' saved to settings.');
+      }
     });
   }
 
