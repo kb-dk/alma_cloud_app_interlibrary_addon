@@ -17,6 +17,7 @@ import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { ExternalLocalizationService } from "./external-localization/external-localization.service";
 import { ConfigComponent } from './config/config.component';
 import { SettingsDialogComponent } from './settings-dialog/settings-dialog.component';
+import { JjComponent } from './jj/jj.component';
 
 export function getToastrModule() {
   return ToastrModule.forRoot({
@@ -35,7 +36,8 @@ export function getToastrModule() {
     UpdateRequestComponent,
     TruncatePipe,
     ConfigComponent,
-    SettingsDialogComponent
+    SettingsDialogComponent,
+    JjComponent
   ],
   entryComponents: [
     SettingsDialogComponent

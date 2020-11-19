@@ -19,7 +19,7 @@ import { Settings } from "../models/settings";
 })
 
 export class ExternalLocalizationComponent implements OnInit {
-  @Input()
+  @Input()//make the following instance variable available to parent components to pass data down.
   private pageLoad$: Subscription;
   private pageLoaded:boolean = false;
   entities: Entity[];
