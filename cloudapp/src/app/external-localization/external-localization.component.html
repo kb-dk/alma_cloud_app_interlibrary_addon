@@ -1,38 +1,42 @@
 <app-topmenu></app-topmenu>
-<div *ngIf="settings.items.length>0 else noExternalLinks">
-  <div *ngIf="attributesFromAlmaArray.length>0 else noEntities">
-    <p>Use the links following the titles below to search for the material externally </p>
-    <div [ngClass]="'table'">
-      <div [ngClass]="'table-row'" *ngFor="let attributesFromAlmaEntry of attributesFromAlmaArray">
-        <!--      <div [ngClass]="'table-row'">-->
-        <p [ngClass]="'table-cell'">{{attributesFromAlmaEntry.getEntryNo()}}</p>
-        <p [ngClass]="'table-cell'" sty>{{attributesFromAlmaEntry.title | truncate : 20}}</p>
-        <!--          <div [ngClass]="'table-row'">-->
-        <!--            <div [ngClass]="'table-cell'"></div>-->
-        <div [ngClass]="'table-cell'">
-            <span *ngFor="let item of settings.items">
-              <a *ngIf="item.searchCriteria=='1'" target="externalLocalization" href="{{item.partOfUrlBeforeSearchCriteria}}+{{attributesFromAlmaEntry.isbn}}+{{item.partOfUrlAfterSearchCriteria}}">{{item.linkName}}</a>
-              <a *ngIf="item.searchCriteria=='2'" target="externalLocalization" href="{{item.partOfUrlBeforeSearchCriteria}}+{{attributesFromAlmaEntry.title}}+{{item.partOfUrlAfterSearchCriteria}}">{{item.linkName}}</a>
-              <a *ngIf="item.searchCriteria=='3'" target="externalLocalization" href="{{item.partOfUrlBeforeSearchCriteria}}+{{attributesFromAlmaEntry.mms_id}}+{{item.partOfUrlAfterSearchCriteria}}">{{item.linkName}}</a>
-              <a *ngIf="item.searchCriteria=='4'" target="externalLocalization" href="{{item.partOfUrlBeforeSearchCriteria}}+{{attributesFromAlmaEntry.author}}+{{item.partOfUrlAfterSearchCriteria}}">{{item.linkName}}</a>
-              <br>
-            </span>
-          <!--          <mat-list *ngFor="let item of settings.items">-->
-          <!--            <mat-list-item>-->
-          <!--            </mat-list-item>-->
-          <!--          </mat-list>-->
+<!-- For testing
+<span *ngIf="!pageLoading">Page Loaded!</span><br>
+<span *ngIf="settingsLoaded else noExternalLinks"> {{settings.items.length}} settings loaded.</span><br><br>
+-->
+<h3 *ngIf="pageLoading">Loading ...</h3>
 
-        </div>
-        <!--      </div>-->
-      </div>
-    </div>
-  </div>
-</div>
 
 <ng-template #noExternalLinks>
-  <span>You have not created any 'External link templates' in the settings section of this cloud app.</span><br>
-  <b><a href="/#/settings">Add external localization links</a></b>
+    <span>You have not created any 'External link templates' in the settings section of this cloud app.</span><br>
+    <b><a href="/#/settings">Add external localization links</a></b>
 </ng-template>
+
 <ng-template #noEntities>
-  Please navigate to a list.
+    <div *ngIf="!pageLoading">Please navigate to a list.</div>
 </ng-template>
+
+    <div *ngIf="pageLoaded$ | async as externalLinkAttributes else noEntities" [ngClass]="'table'">
+        <div *ngIf="settingsFound()">
+        <!--All data is ready-->
+        <p><b>Use the links following the titles below to search for the material externally.</b></p>
+        <div [hidden]="false"  *ngFor="let externalLinkAttribute of externalLinkAttributes">
+            <div  [ngClass]="'table-row'">
+                <span [ngClass]="'table-cell'">{{externalLinkAttribute.id+1 }}</span>
+                <span [ngClass]="'table-cell'">{{externalLinkAttribute.title | truncate : 50}}</span>
+            </div>
+            <div [ngClass]="'table-row'">
+                <div [ngClass]="'table-cell'"></div>
+                <div [ngClass]="'table-cell'">
+            <span *ngFor="let item of settings.items">
+              <a *ngIf="item.searchCriteria=='1'" target="externalLocalization" href="{{item.partOfUrlBeforeSearchCriteria}}+{{externalLinkAttributes.isbn}}+{{item.partOfUrlAfterSearchCriteria}}">{{item.linkName}}</a>
+              <a *ngIf="item.searchCriteria=='2'" target="externalLocalization" href="{{item.partOfUrlBeforeSearchCriteria}}+{{externalLinkAttributes.title}}+{{item.partOfUrlAfterSearchCriteria}}">{{item.linkName}}</a>
+              <a *ngIf="item.searchCriteria=='3'" target="externalLocalization" href="{{item.partOfUrlBeforeSearchCriteria}}+{{externalLinkAttributes.mms_id}}+{{item.partOfUrlAfterSearchCriteria}}">{{item.linkName}}</a>
+              <a *ngIf="item.searchCriteria=='4'" target="externalLocalization" href="{{item.partOfUrlBeforeSearchCriteria}}+{{externalLinkAttributes.author}}+{{item.partOfUrlAfterSearchCriteria}}">{{item.linkName}}</a>
+            </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+

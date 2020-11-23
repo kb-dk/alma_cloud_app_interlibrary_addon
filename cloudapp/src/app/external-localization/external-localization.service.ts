@@ -1,9 +1,7 @@
 import {Injectable} from "@angular/core";
-import {CloudAppRestService, Entity, EntityType} from "@exlibris/exl-cloudapp-angular-lib";
-import {forkJoin, from, iif, Observable, of, throwError} from "rxjs";
-import {catchError, concatMap, map, switchMap} from "rxjs/operators";
-import {AppService} from "../app.service";
-import {AttributesFromAlma} from "./attributesFromAlma";
+import {CloudAppRestService, Entity} from "@exlibris/exl-cloudapp-angular-lib";
+import {forkJoin, Observable, of, throwError} from "rxjs";
+import {catchError, concatMap, map, toArray} from "rxjs/operators";
 
 @Injectable()
 
@@ -12,31 +10,44 @@ export class ExternalLocalizationService {
 constructor(private restService: CloudAppRestService){
 }
 
-    data$ = (entities: Entity[]) => {
-        let calls = entities.map(entity => {
-            return this.getDataFromAlma(entity.link);
+    externalLinkAttributesNEW$ = (entities: Entity[]) =>{
+        return entities.map(entity => {
+            this.getDataFromAlma(entity.link).pipe(
+                map(almaData => almaData.map((almaData, index) => this.externalLinkAttributesFromAlmaRequest(almaData, index))),
+            );
         })
+
+/*
         return (calls.length === 0) ?
             of([]) :
             forkJoin(calls).pipe(
                 catchError(err => this.handleError(err)),
-                // map(calls => calls.map((call, index) => this.attributesFromAlmaCall(call, index))),
-                // map(calls => calls.map((call, index) => this.attributesFromAlmaCall(call, index))),
-            ).subscribe(finalData =>
-                console.log(finalData)
+                map(almaData => almaData.map((almaData, index) => this.externalLinkAttributesFromAlmaRequest(almaData, index))),
+            );
+*/
+    }
+
+    externalLinkAttributes$ = (entities: Entity[]) =>{
+        let calls = entities.map(entity => {
+            return this.getDataFromAlma(entity.link);
+        })
+
+        return (calls.length === 0) ?
+            of([]) :
+            forkJoin(calls).pipe(
+                catchError(err => this.handleError(err)),
+                map(almaData => almaData.map((almaData, index) => this.externalLinkAttributesFromAlmaRequest(almaData, index))),
             );
     }
 
+    private externalLinkAttributesFromAlmaRequest = (almaData, index) => almaData===null ?
+        {id:index, title:'unknown title', mms_id: '', isbn: 'unknown isbn', author: 'unknown author'}:
+        {id:index, title:almaData.requestData.title, mms_id: almaData.requestData.mms_id, isbn: almaData.bibData.isbn, author: almaData.bibData.author};
 
-/*
-    private attributesFromAlmaCall(call: any, index: any) => call === null?
-        {id: index, title: call.data.requestData.    }
 
-*/
-
-    private getDataFromAlma = (link) => this.restService.call(link).pipe(
+    getDataFromAlma = (link) => this.getRequestFromAlma(link).pipe(
         concatMap(requestResult => <Observable<any>>(
-                this.restService.call(`/bibs/${requestResult.mms_id}`)
+                this.getBibrecordFromAlma(requestResult.mms_id)
                     .pipe(
                         map(bibResult => ({
                             requestData: requestResult,
@@ -47,57 +58,16 @@ constructor(private restService: CloudAppRestService){
         )
     );
 
+///bibs/99122212568805763/requests/17242965100005763
+    private getRequestFromAlma = (link) => {
+        return this.restService.call(link);
+    }
 
-
-/*
-    getData(id: String): Observable<any> {
-        return this.http.get<any>(`${this.baseUrl}/path/${id}`).pipe(
-            concatMap(
-                evt =>
-                    <Observable<any>>(
-                        this.http
-                            .get<any>(`${this.baseUrl}/path/relatedby/${evt.child_id}`)
-                            .pipe(
-                                map(resp => ({
-                                    evtData: evt,
-                                    childData: resp
-                                }))
-                            )
-                    )
-            ),
-            // retry(3),
-            // catchError(this.handleError("getData", []))
-        );
-*/
-
-/*
-    switchMap(request => iif(() => request.mms_id !== undefined,
-    this.getRequestFromAlma(`/bibs/${request.mms_id}`))
-*/
-
-
-/*
-    this.dataService.getPlayerData("heunetik").pipe(
-        switchMap(data => this.dataService.getLifetimeStats(data.payload.guid(.pipe(map(innerData => [data, innerData])))
-).subscribe(finalData => {
-    console.log(finalData);
-});
-*/
-
-// To get the user address from the page entities
-// there is the need for two more API call (There might be other ways)
-// get the requests from the link string in the entity object (if there is user info in it)
-// then get the user info from the user_primary_id or user_id field and extract the address from the response
-
-    private attributesFromAlmaRequest = (link) => this.getRequestFromAlma(link).pipe(
-        switchMap(request => iif(() => request.mms_id !== undefined,
-            this.getRequestFromAlma(`/bibs/${request.mms_id}`),
-            of(null)
-        ))
-    );
-
-
-private getRequestFromAlma = link => this.restService.call(link);
+///bibs/{mmsId}
+    private getBibrecordFromAlma = mmsId => {
+        let link = '/bibs/' + mmsId;
+        return this.restService.call(link);
+    }
 
 private handleError = (err: any) => {
     let errorMessage: string;

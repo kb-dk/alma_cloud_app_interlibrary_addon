@@ -1,16 +1,15 @@
 import {Component, Input, OnInit} from '@angular/core';
-import { AppService } from '../app.service';
+import {AppService} from '../app.service';
 import {
-  Entity,
   CloudAppEventsService,
-  CloudAppRestService,
-  CloudAppSettingsService
+  CloudAppSettingsService,
+  Entity,
+  PageInfo
 } from '@exlibris/exl-cloudapp-angular-lib';
-import { from, Subscription, throwError} from 'rxjs';
-import { AttributesFromAlma } from "./attributesFromAlma";
-import { map } from "rxjs/operators";
-import { ExternalLocalizationService } from "./external-localization.service";
-import { Settings } from "../models/settings";
+import {Subject, Subscription} from 'rxjs';
+import {concatMap, tap, toArray} from "rxjs/operators";
+import {ExternalLocalizationService} from "./external-localization.service";
+import {Settings} from "../models/settings";
 
 @Component({
   selector: 'app-external-localization',
@@ -21,90 +20,58 @@ import { Settings } from "../models/settings";
 export class ExternalLocalizationComponent implements OnInit {
   @Input()//make the following instance variable available to parent components to pass data down.
   private pageLoad$: Subscription;
-  private pageLoaded:boolean = false;
-  entities: Entity[];
-  attributesFromAlmaArray: AttributesFromAlma[]=[];
+  private pageLoadedSubscription: Subscription;//an object that represents a disposable resource, usually the execution of an Observable
+  private pageLoadedSubject = new Subject<Entity[]>();
   private settings: Settings;
+  private settingsLoaded:boolean;
+  private pageLoading:boolean;
+  private pageLoaded$ = this.pageLoadedSubject.asObservable().pipe( //This is where we pipe the data from Alma using entities
+      concatMap(entities => this.externalLocationService.externalLinkAttributes$(entities)),
+      tap(() => {
+        console.log('Observable recieved');
+        this.pageLoading = false;
+      }),
+  );
 
-  constructor(private restService: CloudAppRestService,
-              private appService: AppService,
+  constructor(private appService: AppService,
               private eventsService: CloudAppEventsService,
               private settingsService: CloudAppSettingsService,
-              private externalLocationService: ExternalLocalizationService){
-  }
+              private externalLocationService: ExternalLocalizationService)
+  { }
 
-  ngOnInit() {
+  ngOnInit(): void {
+    console.log('ngOnInit');
     this.appService.setTitle('External localization');
+    this.settingsLoaded = false;
+    this.pageLoading = true;
     this.getSettings();
-    this.getBibAttributes();
-  }
-
-
-  private getBibAttributes() {
-    this.pageLoad$ = this.eventsService.onPageLoad(pageInfo => {
-      this.pageLoaded = false;
-      var $retrieveLinkAttributes = from(pageInfo.entities).pipe(
-          map((entity, index) => {
-            //TODO JJEG: Mangler tjek for om hentede attributter findes (catchError block)
-            //Brug evt. concatMap
-            this.getRequestFromAlma(entity.link).subscribe(result => {
-              let mmsId = result.mms_id;
-              let title = result.title;
-              if (mmsId) {
-                this.getBibrecordFromAlma(mmsId).subscribe(bibRecord => {//isbn exist only on another Alma API
-                  let isbn = bibRecord.isbn ;
-                  let author = bibRecord.author;
-                  let tmpNetpunktEntry = this.addNewNetpunktEntry(index, title, mmsId, isbn, author );
-                })
-              }
-            })
-          })
-      );
-      let subscription = $retrieveLinkAttributes.subscribe();
-    });
+    this.pageLoadedSubscription = this.eventsService.onPageLoad(this.onPageLoad);
   }
 
   private getSettings() {
     this.settingsService.get().subscribe(settings => {
       this.settings = settings as Settings;
-    });
+      },
+      error => {
+        console.log('No settings were loaded');
+      },
+      () => {
+        this.settingsLoaded = true;
+      }
+    );
   }
 
-///bibs/99122212568805763/requests/17242965100005763
-  private getRequestFromAlma = link => {
-    return this.restService.call(link);
-  }
-
-  ///bibs/{mmsId}
-  private getBibrecordFromAlma = mmsId => {
-    let link = '/bibs/' + mmsId;
-    return this.restService.call(link);
-  }
-
-
-  private addNewNetpunktEntry( index: number, title: string, mms_id:string, isbn:string,  author:string) {
-    let netpunktEntry = new AttributesFromAlma(index, title, mms_id, isbn, author);
-    this.attributesFromAlmaArray.push(netpunktEntry);
-    return netpunktEntry;
-  }
+  onPageLoad = (pageInfo: PageInfo) => {
+    console.log('onPageLoad');
+    this.pageLoadedSubject.next(pageInfo.entities);
+  };
 
   ngOnDestroy(): void {
-    this.pageLoad$.unsubscribe();
+    this.pageLoadedSubscription.unsubscribe();
+    console.log('ngOnDestroy');
   }
 
-
-/*
-  private onInitTest() {//TODO: Bare testkode
-    let $srcArray = from([1, 2, 3, 4]);
-    let subscription =  $srcArray
-        .pipe(map(val => { return val * 2}))
-        .subscribe(val => { console.log(val)});
-    console.log("before: " + subscription);
-    subscription.unsubscribe();
-    console.log("after: " + subscription);
-
+  settingsFound():boolean {
+    return this.settingsLoaded && this.settings.items.length>0;
   }
-*/
-
-
 }

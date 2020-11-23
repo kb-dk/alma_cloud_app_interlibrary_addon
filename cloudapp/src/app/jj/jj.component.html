@@ -7,16 +7,14 @@
 -->
 
 
-<!--userActions$ er vores Observable på "pageloaded"-->
+<!--pageLoaded$ er vores Observable på "pageloaded"-->
 <div *ngIf="pageLoaded$ | async as externalLinkAttributes">
     <div *ngFor="let externalLinkAttribute of externalLinkAttributes">
-        <span>{{externalLinkAttribute.id}} ,</span>
+        <span>{{externalLinkAttribute.id}} ,</span><br>
         <span>{{externalLinkAttribute.mms_id}}</span><br>
         <span>{{externalLinkAttribute.title}}</span><br>
         <span>{{externalLinkAttribute.author}}</span><br>
     </div>
-
-
 </div>
 
 
