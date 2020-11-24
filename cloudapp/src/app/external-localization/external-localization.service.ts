@@ -2,6 +2,7 @@ import {Injectable} from "@angular/core";
 import {CloudAppRestService, Entity} from "@exlibris/exl-cloudapp-angular-lib";
 import {forkJoin, Observable, of, throwError} from "rxjs";
 import {catchError, concatMap, map, toArray} from "rxjs/operators";
+import {ExternalLinkAttributesImpl} from "../models/external-link-attributes";
 
 @Injectable()
 
@@ -13,7 +14,7 @@ constructor(private restService: CloudAppRestService){
     externalLinkAttributesNEW$ = (entities: Entity[]) =>{
         return entities.map(entity => {
             this.getDataFromAlma(entity.link).pipe(
-                map(almaData => almaData.map((almaData, index) => this.externalLinkAttributesFromAlmaRequest(almaData, index))),
+                map(almaData => almaData.map((almaData, index) => this.extractLinkAttributesFromAlmaData(almaData, index))),
             );
         })
 
@@ -36,14 +37,18 @@ constructor(private restService: CloudAppRestService){
             of([]) :
             forkJoin(calls).pipe(
                 catchError(err => this.handleError(err)),
-                map(almaData => almaData.map((almaData, index) => this.externalLinkAttributesFromAlmaRequest(almaData, index))),
+                map(almaData => almaData.map((almaData, index) => this.extractLinkAttributesFromAlmaData(almaData, index))),
             );
     }
 
-    private externalLinkAttributesFromAlmaRequest = (almaData, index) => almaData===null ?
-        {id:index, title:'unknown title', mms_id: '', isbn: 'unknown isbn', author: 'unknown author'}:
-        {id:index, title:almaData.requestData.title, mms_id: almaData.requestData.mms_id, isbn: almaData.bibData.isbn, author: almaData.bibData.author};
-
+    private extractLinkAttributesFromAlmaData = (almaData, index) => {
+        const title:string = almaData.requestData.title === undefined || null ? '' : almaData.requestData.title;
+        const mmsId:string = almaData.requestData.mms_id === undefined || null ? '' : almaData.requestData.mms_id;
+        const isbn:string =  almaData.bibData.isbn === undefined || null ? '' : almaData.bibData.isbn;
+        const author:string = almaData.bibData.author === undefined || null ? '' : almaData.bibData.author;
+        const externalLinkAttributesImpl = new ExternalLinkAttributesImpl(index, title, mmsId, isbn, author);
+        return externalLinkAttributesImpl;
+    }
 
     getDataFromAlma = (link) => this.getRequestFromAlma(link).pipe(
         concatMap(requestResult => <Observable<any>>(
