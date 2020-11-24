@@ -4,9 +4,9 @@ import { FormGroup } from '@angular/forms';
 import { CloudAppSettingsService } from '@exlibris/exl-cloudapp-angular-lib';
 import { ToastrService } from 'ngx-toastr';
 import { Settings } from '../models/settings';
-import { ExternalLinkTemplate} from "../models/external-link-template";
+import { ExternalLinkTemplate } from "../models/external-link-template";
 import { MatDialog } from "@angular/material/dialog";
-import { SettingsDialogComponent } from "../settings-dialog/settings-dialog.component";
+import { SettingsDialogComponent } from "./settings-dialog/settings-dialog.component";
 
 @Component({
   selector: 'app-settings',
@@ -45,7 +45,6 @@ export class SettingsComponent implements OnInit {
     this.settingsService.set(this.settings).subscribe(
         response => {
             this.toastr.success(toastMessage);
-          // this.form.markAsPristine();
         },
         err => this.toastr.error(err.message),
         () => this.saving = false

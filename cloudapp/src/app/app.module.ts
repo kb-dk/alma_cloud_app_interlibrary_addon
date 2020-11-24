@@ -14,7 +14,7 @@ import { TopmenuComponent } from "./topmenu/topmenu.component";
 import { SettingsComponent } from "./settings/settings.component";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { ExternalLocalizationService } from "./external-localization/external-localization.service";
-import { SettingsDialogComponent } from './settings-dialog/settings-dialog.component';
+import { SettingsDialogComponent } from './settings/settings-dialog/settings-dialog.component';
 
 export function getToastrModule() {
   return ToastrModule.forRoot({
@@ -50,4 +50,5 @@ export function getToastrModule() {
   providers: [Title, ExternalLocalizationService],
   bootstrap: [AppComponent]
 })
+
 export class AppModule { }

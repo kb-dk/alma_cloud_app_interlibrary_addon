@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AppService } from '../app.service';
 
@@ -7,6 +7,7 @@ import { AppService } from '../app.service';
   templateUrl: './topmenu.component.html',
   styleUrls: ['./topmenu.component.scss']
 })
+
 export class TopmenuComponent implements OnInit {
   route: Router;
   title: String;

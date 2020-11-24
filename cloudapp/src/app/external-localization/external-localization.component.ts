@@ -1,15 +1,15 @@
-import {Component, Input, OnInit} from '@angular/core';
-import {AppService} from '../app.service';
+import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import { AppService } from '../app.service';
 import {
   CloudAppEventsService,
   CloudAppSettingsService,
   Entity,
   PageInfo
 } from '@exlibris/exl-cloudapp-angular-lib';
-import {Subject, Subscription} from 'rxjs';
-import {concatMap, tap, toArray} from "rxjs/operators";
-import {ExternalLocalizationService} from "./external-localization.service";
-import {Settings} from "../models/settings";
+import { Subject, Subscription } from 'rxjs';
+import { concatMap, tap } from "rxjs/operators";
+import { ExternalLocalizationService } from "./external-localization.service";
+import { Settings } from "../models/settings";
 
 @Component({
   selector: 'app-external-localization',
@@ -17,18 +17,17 @@ import {Settings} from "../models/settings";
   styleUrls: ['./external-localization.component.scss']
 })
 
-export class ExternalLocalizationComponent implements OnInit {
+export class ExternalLocalizationComponent implements OnInit, OnDestroy {
   @Input()//make the following instance variable available to parent components to pass data down.
   private pageLoad$: Subscription;
   private pageLoadedSubscription: Subscription;//an object that represents a disposable resource, usually the execution of an Observable
   private pageLoadedSubject = new Subject<Entity[]>();
-  private settings: Settings;
+  public settings: Settings;
   private settingsLoaded:boolean;
-  private pageLoading:boolean;
-  private pageLoaded$ = this.pageLoadedSubject.asObservable().pipe( //This is where we pipe the data from Alma using entities
+  public pageLoading:boolean;
+  public pageLoaded$ = this.pageLoadedSubject.asObservable().pipe( //This is where we pipe the data from Alma using entities
       concatMap(entities => this.externalLocationService.externalLinkAttributes$(entities)),
       tap(() => {
-//        console.log('Observable recieved'); TODO
         this.pageLoading = false;
       }),
   );
@@ -62,13 +61,11 @@ export class ExternalLocalizationComponent implements OnInit {
   }
 
   onPageLoad = (pageInfo: PageInfo) => {
-    console.log('onPageLoad');
     this.pageLoadedSubject.next(pageInfo.entities);
   };
 
   ngOnDestroy(): void {
     this.pageLoadedSubscription.unsubscribe();
-    console.log('ngOnDestroy');
   }
 
   settingsFound():boolean {

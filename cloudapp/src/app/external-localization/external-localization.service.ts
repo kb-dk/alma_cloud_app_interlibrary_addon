@@ -1,8 +1,8 @@
-import {Injectable} from "@angular/core";
-import {CloudAppRestService, Entity} from "@exlibris/exl-cloudapp-angular-lib";
-import {forkJoin, Observable, of, throwError} from "rxjs";
-import {catchError, concatMap, map, toArray} from "rxjs/operators";
-import {ExternalLinkAttributesImpl} from "../models/external-link-attributes";
+import { Injectable } from "@angular/core";
+import { CloudAppRestService, Entity } from "@exlibris/exl-cloudapp-angular-lib";
+import { forkJoin, Observable, of, throwError } from "rxjs";
+import { catchError, concatMap, map } from "rxjs/operators";
+import { ExternalLinkAttributesImpl } from "../models/external-link-attributes";
 
 @Injectable()
 
