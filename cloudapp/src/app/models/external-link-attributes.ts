@@ -1,3 +1,4 @@
+
 export interface ExternalLinkAttributes {
     id: number;
     title: string;
@@ -14,11 +15,12 @@ export class  ExternalLinkAttributesImpl implements  ExternalLinkAttributes{
     author: string;
 
     constructor(index: number, title?:string, mms_id?:string, isbn?:string, author?:string) {
-        this.id = index;
+        this.id = index+1;
         this.title = title || '';
         this.mms_id = mms_id || '';
         this.isbn = isbn || '';
         this.author = author || '';
+        console.log('created: ' + this.toString());
     }
 
     public toString(): string {
@@ -29,5 +31,4 @@ export class  ExternalLinkAttributesImpl implements  ExternalLinkAttributes{
             + ' author ' + this.author
             ;
     }
-
 }

@@ -1,6 +1,6 @@
 import {Component, Inject, OnInit} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material/dialog";
-import {ExternalLinkTemplate, SearchCriteria} from "../models/externalLinkTemplate";
+import { ExternalLinkTemplate, SearchCriteriaType} from "../models/external-link-template";
 
 @Component({
   selector: 'app-settings-dialog',
@@ -35,24 +35,24 @@ export class SettingsDialogComponent implements OnInit {
     const mmsIdTestValue = '99122413971805763';
     const authorTestValue = 'H.C.Andersen';
     let testSearchValue: string;
-    switch (+this.data.searchCriteria) {
-      case SearchCriteria.MMS_ID:
+    switch (+this.data.searchCriteriaType) {
+      case SearchCriteriaType.MMS_ID:
         testSearchValue = mmsIdTestValue;
         break;
-      case SearchCriteria.ISBN:
+      case SearchCriteriaType.ISBN:
         testSearchValue = isbnTestValue;
         break;
-      case SearchCriteria.TITLE:
+      case SearchCriteriaType.TITLE:
         testSearchValue = titleTestValue;
         break;
-      case SearchCriteria.AUTHOR:
+      case SearchCriteriaType.AUTHOR:
         testSearchValue = authorTestValue;
         break;
       default:
         break;
     }
-    this.testlink = this.data.partOfUrlBeforeSearchCriteria + testSearchValue + this.data.partOfUrlAfterSearchCriteria;
-    this.readyForSaving = this.data.searchCriteria>0 && this.data.linkName != '' && this.data.partOfUrlBeforeSearchCriteria != ''
+    this.testlink = this.data.startOfLink + testSearchValue + this.data.endOfLink;
+    this.readyForSaving = this.data.searchCriteriaType>0 && this.data.linkName != '' && this.data.startOfLink != ''
   }
 
   toggleShowExample() {

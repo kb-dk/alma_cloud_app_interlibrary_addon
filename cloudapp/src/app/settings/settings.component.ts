@@ -4,7 +4,7 @@ import { FormGroup } from '@angular/forms';
 import { CloudAppSettingsService } from '@exlibris/exl-cloudapp-angular-lib';
 import { ToastrService } from 'ngx-toastr';
 import { Settings } from '../models/settings';
-import { ExternalLinkTemplate} from "../models/externalLinkTemplate";
+import { ExternalLinkTemplate} from "../models/external-link-template";
 import { MatDialog } from "@angular/material/dialog";
 import { SettingsDialogComponent } from "../settings-dialog/settings-dialog.component";
 
@@ -65,9 +65,11 @@ export class SettingsComponent implements OnInit {
       data: new ExternalLinkTemplate()
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().subscribe(result  => {
+      result = result as ExternalLinkTemplate;
+      console.log(result.toString());
       this.dialogOpen = false;
-      const readyForSaving = result.searchCriteria>0 && result.linkName != '' && result.partOfUrlBeforeSearchCriteria != ''
+      const readyForSaving = result.searchCriteriaType>0 && result.linkName != '' && result.startOfLink != ''
       if (readyForSaving) {
         this.settings.items.push(result);
         this.saveSettings('Localization-link: ' + result.linkName + ' saved to settings.');

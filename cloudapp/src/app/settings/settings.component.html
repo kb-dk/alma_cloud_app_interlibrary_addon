@@ -10,18 +10,15 @@
 
 <ng-template #loaded>
   <h2 class="subheading-1">External localization settings</h2>
-  <span></span>
-<!--  <p>This is the settings for adding, editing and removing localisation-links</p> TODO: for future use, if additional settings are added -->
-  <div *ngIf="!settings || settings.items.length>0 else noItems">
+  <div *ngIf="settings && settings.items.length>0 else noItems">
     <mat-list *ngFor="let item of settings.items">
       <mat-list-item>
-<!--        <mat-icon matListIcon>edit</mat-icon>-->
         <span>{{item.linkName}}</span>
-<!--  TODO: JJEG ExLibris Way - virker ikke.       <i class="uxf-icon uxf-close eca-button" (click)="remove(item)">delete</i>-->
+<!--  TODO: JJEG ExLibris Way - dosn't work.       <i class="uxf-icon uxf-close eca-button" (click)="remove(item)">delete</i>-->
         <mat-icon matListIcon (click)="remove(item)">delete</mat-icon>
       </mat-list-item>
     </mat-list>
-    <b><a href="/external-localization">Jump to external localization page.</a></b>
+    <b><a href="#/external-localization">Jump to external localization page.</a></b>
 
   </div>
 

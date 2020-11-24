@@ -42,12 +42,15 @@ constructor(private restService: CloudAppRestService){
     }
 
     private extractLinkAttributesFromAlmaData = (almaData, index) => {
-        const title:string = almaData.requestData.title === undefined || null ? '' : almaData.requestData.title;
-        const mmsId:string = almaData.requestData.mms_id === undefined || null ? '' : almaData.requestData.mms_id;
-        const isbn:string =  almaData.bibData.isbn === undefined || null ? '' : almaData.bibData.isbn;
-        const author:string = almaData.bibData.author === undefined || null ? '' : almaData.bibData.author;
-        const externalLinkAttributesImpl = new ExternalLinkAttributesImpl(index, title, mmsId, isbn, author);
-        return externalLinkAttributesImpl;
+        const title:string = this.cleanInput(almaData.requestData.title);
+        const mmsId:string = this.cleanInput(almaData.requestData.mms_id);
+        const isbn:string =  this.cleanInput(almaData.bibData.isbn);
+        const author:string = this.cleanInput(almaData.bibData.author);
+        return  new ExternalLinkAttributesImpl(index, title, mmsId, isbn, author);
+    }
+
+    private cleanInput = (almaAttribute) => {
+        return almaAttribute === undefined || null ? '' : almaAttribute;
     }
 
     getDataFromAlma = (link) => this.getRequestFromAlma(link).pipe(

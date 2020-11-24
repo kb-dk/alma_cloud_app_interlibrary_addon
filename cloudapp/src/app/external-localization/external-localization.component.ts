@@ -28,7 +28,7 @@ export class ExternalLocalizationComponent implements OnInit {
   private pageLoaded$ = this.pageLoadedSubject.asObservable().pipe( //This is where we pipe the data from Alma using entities
       concatMap(entities => this.externalLocationService.externalLinkAttributes$(entities)),
       tap(() => {
-        console.log('Observable recieved');
+//        console.log('Observable recieved'); TODO
         this.pageLoading = false;
       }),
   );

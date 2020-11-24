@@ -12,12 +12,9 @@ import { TruncatePipe } from "./pipes/truncate.pipe";
 import { ExternalLocalizationComponent } from "./external-localization/external-localization.component";
 import { TopmenuComponent } from "./topmenu/topmenu.component";
 import { SettingsComponent } from "./settings/settings.component";
-import { UpdateRequestComponent } from "./update-request/update-request.component";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { ExternalLocalizationService } from "./external-localization/external-localization.service";
-import { ConfigComponent } from './config/config.component';
 import { SettingsDialogComponent } from './settings-dialog/settings-dialog.component';
-import { JjComponent } from './jj/jj.component';
 
 export function getToastrModule() {
   return ToastrModule.forRoot({
@@ -29,15 +26,12 @@ export function getToastrModule() {
 @NgModule({
   declarations: [
     AppComponent,
-    MainComponent,
     TopmenuComponent,
+    MainComponent,
     SettingsComponent,
-    ExternalLocalizationComponent,
-    UpdateRequestComponent,
-    TruncatePipe,
-    ConfigComponent,
     SettingsDialogComponent,
-    JjComponent
+    ExternalLocalizationComponent,
+    TruncatePipe,
   ],
   entryComponents: [
     SettingsDialogComponent
