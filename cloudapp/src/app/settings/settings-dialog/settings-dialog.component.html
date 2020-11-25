@@ -3,40 +3,44 @@
 <div mat-dialog-content>
     <mat-icon class="info-icon" (click)="toggleShowExample()" color="primary">info</mat-icon>
     <div *ngIf="showExample">
-        <h2>Here you can create an external search link. The format is: [Start of link]<b>[Search Criteria]</b>[End of link(optional)]  </h2>
+        <h2>Here you can create an external search template. The format is: [Start of link]<b>[Search Criteria Type]</b>[End of link(optional)]</h2>
         <mat-divider></mat-divider><br>
         <h2>Example: </h2>
-        <p><b>Full search link:</b> http://test.netpunkt.dk/search/work?search_block_form=term.default+adj+%22<b>hans%20og%20grete</b>%22&page_id=danbib-search</p>
-        <p><b>Start of link:</b> http://test.netpunkt.dk/search/work?search_block_form=term.default+adj+%22</p>
-        <p><b>Search criteria Type:</b> Title</p>
-        <p><b>End of link:</b> %22&page_id=danbib-search</p>
+        <p><b>Original link:</b> http://test.netpunkt.dk/search/work?search_block_form=term.default+adj+%22<b>hans%20og%20grete</b>%22&page_id=danbib-search</p>
+        <p><b>1. Start of link:</b> http://test.netpunkt.dk/search/work?search_block_form=term.default+adj+%22</p>
+        <p><b>2. Search criteria Type</b> (the part of the original link, you want Alma to provide): Title</p>
+        <p><b>3.End of link:</b> %22&page_id=danbib-search</p>
         <mat-divider></mat-divider>
     </div>
     <br *ngIf="!showExample">
 
     <mat-form-field  id="linkName">
-        <mat-label>Name of link</mat-label>
+        <mat-label>Template name</mat-label>
         <input matInput required [(ngModel)]="data.linkName" (change)="onChange()" [maxLength]="20">
     </mat-form-field><br>
-    <label class="example-margin">Search Criteria Type *</label><br>
-    <mat-radio-group [(ngModel)]="data.searchCriteriaType" (change)="onChange()">
-<!--        <mat-radio-button class="settings-control" value="0">None</mat-radio-button><br>-->
-        <mat-radio-button class="settings-control" value="1">Isbn</mat-radio-button><br>
-        <mat-radio-button class="settings-control" value="2">Title</mat-radio-button><br>
-        <mat-radio-button class="settings-control" value="3">MmsId</mat-radio-button><br>
-        <mat-radio-button class="settings-control" value="4">Author</mat-radio-button><br>
-    </mat-radio-group>
+
     <mat-form-field class="linkPart">
-        <mat-label>First part of link</mat-label>
+        <mat-label><span *ngIf="showExample"><b>1. </b></span>Start of link</mat-label>
         <input matInput required [(ngModel)]="data.startOfLink" (change)="onChange()">
     </mat-form-field><br>
+
+    <label class="example-margin"><span *ngIf="showExample"><b>2. </b></span>Search Criteria Type *</label><br>
+    <mat-radio-group [(ngModel)]="data.searchCriteriaType" (change)="onChange()">
+        <!--        <mat-radio-button class="settings-control" value="0">None</mat-radio-button><br>-->
+        <mat-radio-button class="settings-control" value="1">Isbn</mat-radio-button><br>
+        <mat-radio-button class="settings-control" value="2">Title</mat-radio-button><br>
+        <mat-radio-button class="settings-control" value="3">Author</mat-radio-button><br>
+    </mat-radio-group>
+
     <mat-form-field class="linkPart">
-        <mat-label>Second part of link</mat-label>
+        <mat-label><span *ngIf="showExample"><b>3. </b></span>End of link</mat-label>
         <input matInput [(ngModel)]="data.endOfLink" (change)="onChange()">
     </mat-form-field>
 </div>
+
 <a *ngIf="readyForSaving != '' && this.data.searchCriteriaType>0" href="{{testlink}}" target="externalLocalization" ><b>Test link</b></a>
+
 <div mat-dialog-actions>
-    <button mat-button (click)="onCloseClick()">Close</button>
+    <button mat-button (click)="onCloseClick()">Cancel</button>
     <button mat-button [mat-dialog-close]="data" [disabled]="!readyForSaving">Save</button>
 </div>

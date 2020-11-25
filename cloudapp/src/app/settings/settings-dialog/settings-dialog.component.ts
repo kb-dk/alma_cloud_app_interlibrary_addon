@@ -32,13 +32,9 @@ export class SettingsDialogComponent implements OnInit {
     //creates the testlink - only visible if readyForSaving = true;
     const titleTestValue = 'Aesthetics, disinterestedness and effectiveness in political art.';
     const isbnTestValue = '0415232813';
-    const mmsIdTestValue = '99122413971805763';
     const authorTestValue = 'H.C.Andersen';
     let testSearchValue: string;
     switch (+this.data.searchCriteriaType) {
-      case SearchCriteriaType.MMS_ID:
-        testSearchValue = mmsIdTestValue;
-        break;
       case SearchCriteriaType.ISBN:
         testSearchValue = isbnTestValue;
         break;

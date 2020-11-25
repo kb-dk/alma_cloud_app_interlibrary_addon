@@ -43,10 +43,9 @@ constructor(private restService: CloudAppRestService){
 
     private extractLinkAttributesFromAlmaData = (almaData, index) => {
         const title:string = this.cleanInput(almaData.requestData.title);
-        const mmsId:string = this.cleanInput(almaData.requestData.mms_id);
         const isbn:string =  this.cleanInput(almaData.bibData.isbn);
         const author:string = this.cleanInput(almaData.bibData.author);
-        return  new ExternalLinkAttributesImpl(index, title, mmsId, isbn, author);
+        return new ExternalLinkAttributesImpl(index, title, isbn, author);
     }
 
     private cleanInput = (almaAttribute) => {

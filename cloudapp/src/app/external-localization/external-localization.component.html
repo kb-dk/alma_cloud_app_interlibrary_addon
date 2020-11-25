@@ -30,7 +30,6 @@
             <span *ngFor="let item of settings.items">
               <a *ngIf="item.searchCriteriaType=='1'" target="externalLocalization" href="{{item.startOfLink}}+{{externalLinkAttributes.isbn}}+{{item.endOfLink}}">{{item.linkName}}</a>
               <a *ngIf="item.searchCriteriaType=='2'" target="externalLocalization" href="{{item.startOfLink}}+{{externalLinkAttributes.title}}+{{item.endOfLink}}">{{item.linkName}}</a>
-              <a *ngIf="item.searchCriteriaType=='3'" target="externalLocalization" href="{{item.startOfLink}}+{{externalLinkAttributes.mms_id}}+{{item.endOfLink}}">{{item.linkName}}</a>
               <a *ngIf="item.searchCriteriaType=='4'" target="externalLocalization" href="{{item.startOfLink}}+{{externalLinkAttributes.author}}+{{item.endOfLink}}">{{item.linkName}}</a>
             </span>
                 </div>

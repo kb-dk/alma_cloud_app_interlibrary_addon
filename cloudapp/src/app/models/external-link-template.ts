@@ -7,7 +7,7 @@ export class ExternalLinkTemplate {
 
     constructor(linkname?: string, searchCriteriaType?:string, startOfLink?:string, endOfLink?:string) {
         this.linkName = linkname || '';
-        this.id = Math.floor(Math.random()*(40000-1+1)+1);//'Unique' id
+        this.id = Math.floor(Math.random()*(100000-1+1)+1);//'Unique' id
         this.searchCriteriaType = SearchCriteriaType[searchCriteriaType] || SearchCriteriaType.NONE;
         this.startOfLink = startOfLink || '';
         this.endOfLink = endOfLink || '';
@@ -28,6 +28,5 @@ export enum SearchCriteriaType {
     NONE = 0,
     ISBN = 1,
     TITLE = 2,
-    MMS_ID = 3,
-    AUTHOR = 4
+    AUTHOR = 3
 }
