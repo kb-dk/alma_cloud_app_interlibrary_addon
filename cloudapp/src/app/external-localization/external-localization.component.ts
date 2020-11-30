@@ -1,15 +1,10 @@
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
-import { AppService } from '../app.service';
-import {
-  CloudAppEventsService,
-  CloudAppSettingsService,
-  Entity,
-  PageInfo
-} from '@exlibris/exl-cloudapp-angular-lib';
-import { Subject, Subscription } from 'rxjs';
-import { concatMap, tap } from "rxjs/operators";
-import { ExternalLocalizationService } from "./external-localization.service";
-import { Settings } from "../models/settings";
+import {AppService} from '../app.service';
+import {CloudAppEventsService, CloudAppSettingsService, Entity, PageInfo} from '@exlibris/exl-cloudapp-angular-lib';
+import {Subject, Subscription} from 'rxjs';
+import {concatMap, tap} from "rxjs/operators";
+import {ExternalLocalizationService} from "./external-localization.service";
+import {Settings} from "../models/settings";
 
 @Component({
   selector: 'app-external-localization',
@@ -25,9 +20,11 @@ export class ExternalLocalizationComponent implements OnInit, OnDestroy {
   public settings: Settings;
   private settingsLoaded:boolean;
   public pageLoading:boolean;
+  private borrowningListCount = 0;
   public pageLoaded$ = this.pageLoadedSubject.asObservable().pipe( //This is where we pipe the data from Alma using entities
       concatMap(entities => this.externalLocationService.externalLinkAttributes$(entities)),
-      tap(() => {
+      tap(result => {
+        this.borrowningListCount = result.length;
         this.pageLoading = false;
       }),
   );
@@ -39,7 +36,6 @@ export class ExternalLocalizationComponent implements OnInit, OnDestroy {
   { }
 
   ngOnInit(): void {
-    console.log('ngOnInit');
     this.appService.setTitle('External localization');
     this.settingsLoaded = false;
     this.pageLoading = true;
@@ -56,6 +52,9 @@ export class ExternalLocalizationComponent implements OnInit, OnDestroy {
       },
       () => {
         this.settingsLoaded = true;
+        if (this.settings.items.length > 0) {
+          console.log('Settings were loaded');
+        }
       }
     );
   }
@@ -69,6 +68,8 @@ export class ExternalLocalizationComponent implements OnInit, OnDestroy {
   }
 
   settingsFound():boolean {
-    return this.settingsLoaded && this.settings.items.length>0;
+    console.log('jj' + this.settings.items);
+    return this.settingsLoaded && this.settings.items && this.settings.items.length>0;
   }
+
 }

@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
-import { CloudAppRestService, Entity } from "@exlibris/exl-cloudapp-angular-lib";
+import {CloudAppRestService, Entity, EntityType} from "@exlibris/exl-cloudapp-angular-lib";
 import { forkJoin, Observable, of, throwError } from "rxjs";
-import { catchError, concatMap, map } from "rxjs/operators";
+import {catchError, concatMap, map, tap} from "rxjs/operators";
 import { ExternalLinkAttributesImpl } from "../models/external-link-attributes";
 
 @Injectable()
@@ -11,30 +11,29 @@ export class ExternalLocalizationService {
 constructor(private restService: CloudAppRestService){
 }
 
-    externalLinkAttributesNEW$ = (entities: Entity[]) =>{
-        return entities.map(entity => {
-            this.getDataFromAlma(entity.link).pipe(
-                map(almaData => almaData.map((almaData, index) => this.extractLinkAttributesFromAlmaData(almaData, index))),
-            );
+    externalLinkAttributes$ = (entities: Entity[]) =>{
+        let calls = entities
+            .filter(entity => entity.type.toString() == 'BORROWING_REQUEST')// ExLibris EntityType dosn't have an EntityType.BORROWING_REQUEST!??
+            .map(entity => {
+            return this.getRequestFromAlma(entity.link);
         })
 
-/*
         return (calls.length === 0) ?
             of([]) :
             forkJoin(calls).pipe(
                 catchError(err => this.handleError(err)),
-                map(almaData => almaData.map((almaData, index) => this.externalLinkAttributesFromAlmaRequest(almaData, index))),
+                map(almaData => almaData.map((almaData, index) => this.extractLinkAttributesFromAlmaData(almaData, index))),
             );
-*/
     }
 
-    externalLinkAttributes$ = (entities: Entity[]) =>{
+    externalLinkAttributesOLD$ = (entities: Entity[]) =>{
         let calls = entities.map(entity => {
+            console.log('Type:' + entity.type);
+            console.log('Type:' + entity.link);
             return this.getDataFromAlma(entity.link);
         })
-
         return (calls.length === 0) ?
-            of([]) :
+            of(['hest']) :
             forkJoin(calls).pipe(
                 catchError(err => this.handleError(err)),
                 map(almaData => almaData.map((almaData, index) => this.extractLinkAttributesFromAlmaData(almaData, index))),
@@ -42,6 +41,13 @@ constructor(private restService: CloudAppRestService){
     }
 
     private extractLinkAttributesFromAlmaData = (almaData, index) => {
+        const title:string = this.cleanInput(almaData.title);
+        const isbn:string =  this.cleanInput(almaData.isbn);
+        const author:string = this.cleanInput(almaData.author);
+        return new ExternalLinkAttributesImpl(index, title, isbn, author);
+    }
+
+    private extractLinkAttributesFromAlmaDataOLD = (almaData, index) => {
         const title:string = this.cleanInput(almaData.requestData.title);
         const isbn:string =  this.cleanInput(almaData.bibData.isbn);
         const author:string = this.cleanInput(almaData.bibData.author);
@@ -53,6 +59,7 @@ constructor(private restService: CloudAppRestService){
     }
 
     getDataFromAlma = (link) => this.getRequestFromAlma(link).pipe(
+        tap(result => console.log(result)),
         concatMap(requestResult => <Observable<any>>(
                 this.getBibrecordFromAlma(requestResult.mms_id)
                     .pipe(
@@ -88,7 +95,6 @@ private handleError = (err: any) => {
     console.error(err);
     return throwError(errorMessage);
 };
-
 
 }
 

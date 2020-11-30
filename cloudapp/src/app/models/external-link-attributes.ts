@@ -20,9 +20,13 @@ export class  ExternalLinkAttributesImpl implements  ExternalLinkAttributes{
         console.log('created: ' + this.toString());
     }
 
+    public getEncodedTitle():string {
+       return encodeURI(this.title);
+    }
+
     public toString(): string {
         return 'id: ' + this.id
-            + ' title: ' + this.title
+            + ' title: |' + this.title +'|'
             + ' isbn: ' + this.isbn
             + ' author ' + this.author
             ;
