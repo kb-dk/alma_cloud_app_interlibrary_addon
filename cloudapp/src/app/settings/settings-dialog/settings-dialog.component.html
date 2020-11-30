@@ -1,4 +1,4 @@
-<h1 mat-dialog-title>Create new external search link</h1>
+<h1 mat-dialog-title>Create new external search template</h1>
 
 <div mat-dialog-content>
     <mat-icon class="info-icon" (click)="toggleShowExample()" color="primary">info</mat-icon>
@@ -38,9 +38,9 @@
     </mat-form-field>
 </div>
 
-<a *ngIf="readyForSaving != '' && this.data.searchCriteriaType>0" href="{{testlink}}" target="externalLocalization" ><b>Test link</b></a>
+<a *ngIf="readyForSaving != '' && this.data.searchCriteriaType>0" href="{{testlink}}" target="externalLocalization"><b>Test link</b></a>
 
 <div mat-dialog-actions>
-    <button mat-button (click)="onCloseClick()">Cancel</button>
-    <button mat-button [mat-dialog-close]="data" [disabled]="!readyForSaving">Save</button>
+    <button mat-button (click)="onCloseClick()" color="secondary">Cancel</button>
+    <button mat-button [mat-dialog-close]="data" [disabled]="!readyForSaving" color="primary">Save template</button>
 </div>

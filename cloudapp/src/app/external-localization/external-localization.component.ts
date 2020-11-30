@@ -16,6 +16,7 @@ export class ExternalLocalizationComponent implements OnInit, OnDestroy {
   @Input()//make the following instance variable available to parent components to pass data down.
   private pageLoad$: Subscription;
   private pageLoadedSubscription: Subscription;//an object that represents a disposable resource, usually the execution of an Observable
+  private pageMetadataSubscription: Subscription;
   private pageLoadedSubject = new Subject<Entity[]>();
   public settings: Settings;
   private settingsLoaded:boolean;
@@ -40,6 +41,7 @@ export class ExternalLocalizationComponent implements OnInit, OnDestroy {
     this.settingsLoaded = false;
     this.pageLoading = true;
     this.getSettings();
+    this.pageMetadataSubscription = this.eventsService.getPageMetadata().subscribe(this.onPageLoad);
     this.pageLoadedSubscription = this.eventsService.onPageLoad(this.onPageLoad);
   }
 
@@ -64,11 +66,11 @@ export class ExternalLocalizationComponent implements OnInit, OnDestroy {
   };
 
   ngOnDestroy(): void {
+    this.pageMetadataSubscription.unsubscribe();
     this.pageLoadedSubscription.unsubscribe();
   }
 
   settingsFound():boolean {
-    console.log('jj' + this.settings.items);
     return this.settingsLoaded && this.settings.items && this.settings.items.length>0;
   }
 

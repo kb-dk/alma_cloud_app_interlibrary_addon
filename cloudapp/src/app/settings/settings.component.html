@@ -14,7 +14,9 @@
     <mat-list *ngFor="let item of settings.items">
       <mat-list-item>
         <span>{{item.linkName}}</span>
-<!--  TODO: JJEG ExLibris Way - dosn't work.       <i class="uxf-icon uxf-close eca-button" (click)="remove(item)">delete</i>-->
+<!--  TODO: JJEG ExLibris Way(https://developers.exlibrisgroup.com/cloudapps/docs/style/#colors) - dosn't work.
+        <i class="uxf-icon uxf-close eca-button" (click)="remove(item)">delete</i>
+-->
         <mat-icon matListIcon (click)="remove(item)">delete</mat-icon>
       </mat-list-item>
     </mat-list>
