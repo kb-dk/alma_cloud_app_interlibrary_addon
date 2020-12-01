@@ -1,31 +1,36 @@
 <app-topmenu></app-topmenu>
-<h3 *ngIf="pageLoading">Loading ...</h3>
 
-<div *ngIf="settings && settings.items.length===0">
+<div *ngIf="!settingsExists() else showTable">
     <span>You have not created any 'External link templates' in the settings section of this cloud app.</span><br>
     <b><a href="/#/settings">Add external localization links</a></b><br><br>
 </div>
 
-<p *ngIf="!pageLoading && borrowningListCount == 0"><b>Please navigate to list of Borrowing requests</b></p>
-<p *ngIf="!pageLoading && borrowningListCount > 0"><b>Use the links following the titles below to search for the material externally.</b></p>
+<ng-template #showTable>
+    <h3 *ngIf="pageLoading">Loading ...</h3>
+    <div class="loading-shade" *ngIf="pageLoading">
+        <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
+    </div>
 
-<div *ngIf="pageLoaded$ | async as externalLinkAttributes" [ngClass]="'table'">
-    <div [ngClass]="'table'" *ngFor="let externalLinkAttribute of externalLinkAttributes">
-        <div  [ngClass]="'table-row'">
-            <span [ngClass]="'table-cell'">{{externalLinkAttribute.id }}</span>
-            <span [ngClass]="'table-cell'">{{externalLinkAttribute.title | truncate : 50}}</span>
-        </div>
-        <div [ngClass]="'table-row'">
-            <div [ngClass]="'table-cell'"></div>
-            <div [ngClass]="'table-cell'">
-            <span *ngFor="let item of settings.items">
-              <a matTooltip="Isbn: {{externalLinkAttribute.isbn}}" matTooltipShowDelay="1500" *ngIf="item.searchCriteriaType=='1'" target="externalLocalization" href="{{item.startOfLink}}+{{externalLinkAttribute.isbn}}+{{item.endOfLink}}">{{item.linkName}}</a>
-              <a matTooltip="Title: {{externalLinkAttribute.title}}" matTooltipShowDelay="1500" *ngIf="item.searchCriteriaType=='2'" target="externalLocalization" href="{{item.startOfLink}}+{{externalLinkAttribute.getEncodedTitle()}}+{{item.endOfLink}}">{{item.linkName}}</a>
-              <a matTooltip="Author: {{externalLinkAttribute.author}}" matTooltipShowDelay="1500" *ngIf="item.searchCriteriaType=='4'" target="externalLocalization" href="{{item.startOfLink}}+{{externalLinkAttribute.author}}+{{item.endOfLink}}">{{item.linkName}}</a>
-            </span>
+    <p *ngIf="!pageLoading && borrowningListCount == 0"><b>Please navigate to list of Borrowing requests</b></p>
+    <p *ngIf="!pageLoading && borrowningListCount > 0"><b>Use the links following the titles below to search for the material externally.</b></p>
+
+    <div *ngIf="pageLoaded$ | async as externalLinkAttributes" [ngClass]="'table'">
+        <div *ngFor="let externalLinkAttribute of externalLinkAttributes">
+            <div  [ngClass]="'table-row'">
+                <span [ngClass]="'table-cell'">{{externalLinkAttribute.id }}</span>
+                <span [ngClass]="'table-cell'">{{externalLinkAttribute.title | truncate : 50}}</span>
+            </div>
+            <div [ngClass]="'table-row'">
+                <div [ngClass]="'table-cell'"></div>
+                <div [ngClass]="'table-cell'">
+                <span *ngFor="let item of settings.externalLinkTemplates">
+                  <a matTooltip="Isbn: {{externalLinkAttribute.isbn}}" matTooltipShowDelay="1500" *ngIf="item.searchCriteriaType=='1'" target="externalLocalization" href="{{item.startOfLink}}+{{externalLinkAttribute.isbn}}+{{item.endOfLink}}">{{item.linkName}}</a>
+                  <a matTooltip="Title: {{externalLinkAttribute.title}}" matTooltipShowDelay="1500" *ngIf="item.searchCriteriaType=='2'" target="externalLocalization" href="{{item.startOfLink}}+{{externalLinkAttribute.getEncodedTitle()}}+{{item.endOfLink}}">{{item.linkName}}</a>
+                  <a matTooltip="Author: {{externalLinkAttribute.author}}" matTooltipShowDelay="1500" *ngIf="item.searchCriteriaType=='4'" target="externalLocalization" href="{{item.startOfLink}}+{{externalLinkAttribute.author}}+{{item.endOfLink}}">{{item.linkName}}</a>
+                </span>
+                </div>
             </div>
         </div>
     </div>
-</div>
-
+</ng-template>
 

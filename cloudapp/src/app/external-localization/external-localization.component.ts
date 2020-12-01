@@ -19,7 +19,6 @@ export class ExternalLocalizationComponent implements OnInit, OnDestroy {
   private pageMetadataSubscription: Subscription;
   private pageLoadedSubject = new Subject<Entity[]>();
   public settings: Settings;
-  private settingsLoaded:boolean;
   public pageLoading:boolean;
   private borrowningListCount = 0;
   public pageLoaded$ = this.pageLoadedSubject.asObservable().pipe( //This is where we pipe the data from Alma using entities
@@ -38,7 +37,6 @@ export class ExternalLocalizationComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.appService.setTitle('External localization');
-    this.settingsLoaded = false;
     this.pageLoading = true;
     this.getSettings();
     this.pageMetadataSubscription = this.eventsService.getPageMetadata().subscribe(this.onPageLoad);
@@ -47,18 +45,14 @@ export class ExternalLocalizationComponent implements OnInit, OnDestroy {
 
   private getSettings() {
     this.settingsService.get().subscribe(settings => {
-      this.settings = settings as Settings;
-      },
-      error => {
-        console.log('No settings were loaded');
-      },
-      () => {
-        this.settingsLoaded = true;
-        if (this.settings.items.length > 0) {
-          console.log('Settings were loaded');
-        }
+      if(!settings.externalLinkTemplates) {
+        settings = new Settings();
       }
-    );
+      this.settings = settings;
+    },
+    error => {
+      console.log('No settings were loaded');
+    });
   }
 
   onPageLoad = (pageInfo: PageInfo) => {
@@ -70,8 +64,9 @@ export class ExternalLocalizationComponent implements OnInit, OnDestroy {
     this.pageLoadedSubscription.unsubscribe();
   }
 
-  settingsFound():boolean {
-    return this.settingsLoaded && this.settings.items && this.settings.items.length>0;
+  public settingsExists():boolean {
+    return (this.settings && this.settings.externalLinkTemplates && this.settings.externalLinkTemplates.length > 0);
   }
+
 
 }

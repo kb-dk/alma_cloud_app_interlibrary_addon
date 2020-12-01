@@ -26,20 +26,6 @@ constructor(private restService: CloudAppRestService){
             );
     }
 
-    externalLinkAttributesOLD$ = (entities: Entity[]) =>{
-        let calls = entities.map(entity => {
-            console.log('Type:' + entity.type);
-            console.log('Type:' + entity.link);
-            return this.getDataFromAlma(entity.link);
-        })
-        return (calls.length === 0) ?
-            of(['hest']) :
-            forkJoin(calls).pipe(
-                catchError(err => this.handleError(err)),
-                map(almaData => almaData.map((almaData, index) => this.extractLinkAttributesFromAlmaData(almaData, index))),
-            );
-    }
-
     private extractLinkAttributesFromAlmaData = (almaData, index) => {
         const title:string = this.cleanInput(almaData.title);
         const isbn:string =  this.cleanInput(almaData.isbn);
@@ -47,30 +33,9 @@ constructor(private restService: CloudAppRestService){
         return new ExternalLinkAttributesImpl(index, title, isbn, author);
     }
 
-    private extractLinkAttributesFromAlmaDataOLD = (almaData, index) => {
-        const title:string = this.cleanInput(almaData.requestData.title);
-        const isbn:string =  this.cleanInput(almaData.bibData.isbn);
-        const author:string = this.cleanInput(almaData.bibData.author);
-        return new ExternalLinkAttributesImpl(index, title, isbn, author);
-    }
-
     private cleanInput = (almaAttribute) => {
         return almaAttribute === undefined || null ? '' : almaAttribute;
     }
-
-    getDataFromAlma = (link) => this.getRequestFromAlma(link).pipe(
-        tap(result => console.log(result)),
-        concatMap(requestResult => <Observable<any>>(
-                this.getBibrecordFromAlma(requestResult.mms_id)
-                    .pipe(
-                        map(bibResult => ({
-                            requestData: requestResult,
-                            bibData: bibResult
-                        }))
-                    )
-            )
-        )
-    );
 
 ///bibs/99122212568805763/requests/17242965100005763
     private getRequestFromAlma = (link) => {

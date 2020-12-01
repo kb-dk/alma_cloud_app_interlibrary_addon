@@ -17,7 +17,6 @@ export class  ExternalLinkAttributesImpl implements  ExternalLinkAttributes{
         this.title = title || '';
         this.isbn = isbn || '';
         this.author = author || '';
-        console.log('created: ' + this.toString());
     }
 
     public getEncodedTitle():string {

@@ -25,7 +25,6 @@ export class SettingsDialogComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    console.log('Settings-dialog started')
   }
 
   onChange() {

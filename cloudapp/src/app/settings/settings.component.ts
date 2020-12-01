@@ -1,12 +1,11 @@
-import { Component, OnInit } from '@angular/core';
-import { AppService } from '../app.service';
-import { FormGroup } from '@angular/forms';
-import { CloudAppSettingsService } from '@exlibris/exl-cloudapp-angular-lib';
-import { ToastrService } from 'ngx-toastr';
-import { Settings } from '../models/settings';
-import { ExternalLinkTemplate } from "../models/external-link-template";
-import { MatDialog } from "@angular/material/dialog";
-import { SettingsDialogComponent } from "./settings-dialog/settings-dialog.component";
+import {Component, OnInit} from '@angular/core';
+import {AppService} from '../app.service';
+import {CloudAppSettingsService} from '@exlibris/exl-cloudapp-angular-lib';
+import {ToastrService} from 'ngx-toastr';
+import {Settings} from '../models/settings';
+import {ExternalLinkTemplate} from "../models/external-link-template";
+import {MatDialog} from "@angular/material/dialog";
+import {SettingsDialogComponent} from "./settings-dialog/settings-dialog.component";
 
 @Component({
   selector: 'app-settings',
@@ -14,9 +13,7 @@ import { SettingsDialogComponent } from "./settings-dialog/settings-dialog.compo
   styleUrls: ['./settings.component.scss']
 })
 export class SettingsComponent implements OnInit {
-  items: ExternalLinkTemplate[] = [];
-  loading: boolean = true;
-  form: FormGroup;
+  externalLinkTemplates: ExternalLinkTemplate[] = [];
   settings: Settings;
   saving = false;
   dialogOpen: boolean = false;
@@ -29,15 +26,17 @@ export class SettingsComponent implements OnInit {
     ) { }
 
   ngOnInit() {
+    this.appService.setTitle('Settings');
+    this.getSettings();
+  }
+
+  private getSettings() {
     this.settingsService.get().subscribe(result => {
-      if(!result.items) {
-        result.settings.items = [];
-        console.log("Items oprettet" + result.items);
+      if (!result.externalLinkTemplates) {
+        result = new Settings();
       }
       this.settings = result;
     })
-    this.appService.setTitle('Settings');
-    this.loading = false;
   }
 
   private saveSettings(toastMessage:string) {
@@ -52,9 +51,9 @@ export class SettingsComponent implements OnInit {
     this.saving = false;
   }
 
-  remove(removableItem: ExternalLinkTemplate) {
-    this.settings.items = this.settings.items.filter(item => item.id != removableItem.id);
-    this.saveSettings('Localization-link: ' + removableItem.linkName + ' removed from settings.');
+  remove(removableExternalLinkTemplate: ExternalLinkTemplate) {
+    this.settings.externalLinkTemplates = this.settings.externalLinkTemplates.filter(externalLinkTemplate => externalLinkTemplate.id != removableExternalLinkTemplate.id);
+    this.saveSettings('Template: ' + removableExternalLinkTemplate.linkName + ' removed from settings.');
   }
 
   openDialog() {
@@ -66,11 +65,10 @@ export class SettingsComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(result  => {
       result = result as ExternalLinkTemplate;
-      console.log(result.toString());
       this.dialogOpen = false;
       const readyForSaving = result.searchCriteriaType>0 && result.linkName != '' && result.startOfLink != ''
       if (readyForSaving) {
-        this.settings.items.push(result);
+        this.settings.externalLinkTemplates.push(result);
         this.saveSettings('Localization-link: ' + result.linkName + ' saved to settings.');
       }
     });
