@@ -1,11 +1,10 @@
 {
    "id": "interlibrary-add-on",
    "title": "Interlibrary Add-on",
-   "description": "Adding extra functionality related to interlibrary activities - e.g. external localisation of materials. ",
+   "description": "Adding extra functionality related to interlibrary activities - for at start templates for external localization of materials. ",
    "author": "Royal Danish Libraty, Denmark",
    "pages": {
-      "settings": "/#/settings",
-      "help": "https://github.com/ExLibrisGroup/cloudapp-tutorials"
+      "settings": "/#/settings"
    },
    "icon": {
       "type": "font",
