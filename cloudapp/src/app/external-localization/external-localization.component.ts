@@ -20,7 +20,7 @@ export class ExternalLocalizationComponent implements OnInit, OnDestroy {
   private pageLoadedSubject = new Subject<Entity[]>();
   public settings: Settings;
   public pageLoading:boolean;
-  private borrowningListCount = 0;
+  public borrowningListCount = 0;
   public pageLoaded$ = this.pageLoadedSubject.asObservable().pipe( //This is where we pipe the data from Alma using entities
       concatMap(entities => this.externalLocationService.externalLinkAttributes$(entities)),
       tap(result => {

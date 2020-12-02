@@ -1,7 +1,7 @@
 {
    "id": "interlibrary-add-on",
    "title": "Interlibrary Add-on",
-   "description": "Adding extra functionality related to interlibrary activities - for at start templates for external localization of materials. ",
+   "description": "Adding extra functionality related to inter-library activities - for at start templates for external localization of Borrowing Request materials. ",
    "author": "Royal Danish Libraty, Denmark",
    "pages": {
       "settings": "/#/settings"
