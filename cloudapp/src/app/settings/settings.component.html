@@ -1,10 +1,10 @@
 <app-topmenu>
   <div buttons>
-    <button mat-flat-button type="button" color="primary" (click)="openDialog()" [disabled]="dialogOpen">Add template</button>
+    <button mat-flat-button type="button" color="primary" (click)="openDialog()" [disabled]="dialogOpen">Add link template</button>
   </div>
 </app-topmenu>
 
-  <h2 class="subheading-1">External localization settings</h2>
+  <h3 class="subheading-1">External localization settings:</h3>
   <div *ngIf="settings && settings.externalLinkTemplates.length>0 else noExternalLinkTemplates">
     <mat-list *ngFor="let item of settings.externalLinkTemplates">
       <mat-list-item>
@@ -20,7 +20,7 @@
 
 <ng-template #noExternalLinkTemplates>
   <div id="emptyList">
-    <p>Add templates to the list: Click 'Add template'.</p>
+    <p>Add link template by clicking 'Add link template'-button.</p>
   </div>
 </ng-template>
 
