@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import {CloudAppRestService, Entity, EntityType} from "@exlibris/exl-cloudapp-angular-lib";
-import { forkJoin, Observable, of, throwError } from "rxjs";
-import {catchError, concatMap, map, tap} from "rxjs/operators";
+import { forkJoin, of, throwError } from "rxjs";
+import {catchError, map} from "rxjs/operators";
 import { ExternalLinkAttributesImpl } from "../models/external-link-attributes";
 
 @Injectable()
@@ -13,10 +13,10 @@ constructor(private restService: CloudAppRestService){
 
     externalLinkAttributes$ = (entities: Entity[]) =>{
         let calls = entities
-            .filter(entity => entity.type.toString() == 'BORROWING_REQUEST')// ExLibris EntityType dosn't have an EntityType.BORROWING_REQUEST!??
+            .filter(entity => [EntityType.BORROWING_REQUEST].includes(entity.type))
             .map(entity => {
             return this.getRequestFromAlma(entity.link);
-        })
+        });
 
         return (calls.length === 0) ?
             of([]) :
@@ -24,29 +24,23 @@ constructor(private restService: CloudAppRestService){
                 catchError(err => this.handleError(err)),
                 map(almaData => almaData.map((almaData, index) => this.extractLinkAttributesFromAlmaData(almaData, index))),
             );
-    }
+    };
 
     private extractLinkAttributesFromAlmaData = (almaData, index) => {
         const title:string = this.cleanInput(almaData.title);
         const isbn:string =  this.cleanInput(almaData.isbn);
         const author:string = this.cleanInput(almaData.author);
         return new ExternalLinkAttributesImpl(index, title, isbn, author);
-    }
+    };
 
     private cleanInput = (almaAttribute) => {
         return almaAttribute === undefined || null ? '' : almaAttribute;
-    }
+    };
 
 ///bibs/99122212568805763/requests/17242965100005763
     private getRequestFromAlma = (link) => {
         return this.restService.call(link);
-    }
-
-///bibs/{mmsId}
-    private getBibrecordFromAlma = mmsId => {
-        let link = '/bibs/' + mmsId;
-        return this.restService.call(link);
-    }
+    };
 
 private handleError = (err: any) => {
     let errorMessage: string;
