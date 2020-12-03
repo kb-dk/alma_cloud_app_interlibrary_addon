@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import {CloudAppRestService, Entity, EntityType} from "@exlibris/exl-cloudapp-angular-lib";
-import { forkJoin, Observable, of, throwError } from "rxjs";
-import {catchError, concatMap, map, tap} from "rxjs/operators";
+import { forkJoin, of, throwError } from "rxjs";
+import {catchError, map} from "rxjs/operators";
 import { ExternalLinkAttributesImpl } from "../models/external-link-attributes";
 
 @Injectable()
@@ -39,12 +39,6 @@ constructor(private restService: CloudAppRestService){
 
 ///bibs/99122212568805763/requests/17242965100005763
     private getRequestFromAlma = (link) => {
-        return this.restService.call(link);
-    };
-
-///bibs/{mmsId}
-    private getBibrecordFromAlma = mmsId => {
-        let link = '/bibs/' + mmsId;
         return this.restService.call(link);
     };
 
