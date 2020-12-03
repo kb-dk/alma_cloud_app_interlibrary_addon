@@ -20,7 +20,7 @@ export class  ExternalLinkAttributesImpl implements  ExternalLinkAttributes{
     }
 
     public getEncodedTitle():string {
-       return encodeURI(this.title);
+       return encodeURIComponent(this.title);
     }
 
     public toString(): string {
