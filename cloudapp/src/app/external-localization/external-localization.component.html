@@ -26,7 +26,7 @@
                 <span *ngFor="let item of settings.externalLinkTemplates">
                   <a matTooltip="Isbn: {{externalLinkAttribute.isbn}}" matTooltipShowDelay="1500" *ngIf="(externalLinkAttribute.isbn!='') && (item.searchCriteriaType=='1')" target="externalLocalization" href="{{item.startOfLink}}+{{externalLinkAttribute.isbn}}+{{item.endOfLink}}">{{item.linkName}}</a>
                   <a matTooltip="Title: {{externalLinkAttribute.title}}" matTooltipShowDelay="1500" *ngIf="item.searchCriteriaType=='2'" target="externalLocalization" href="{{item.startOfLink}}+{{externalLinkAttribute.getEncodedTitle()}}+{{item.endOfLink}}">{{item.linkName}}</a>
-                  <a matTooltip="Author: {{externalLinkAttribute.author}}" matTooltipShowDelay="1500" *ngIf="item.searchCriteriaType=='4'" target="externalLocalization" href="{{item.startOfLink}}+{{externalLinkAttribute.author}}+{{item.endOfLink}}">{{item.linkName}}</a>
+                  <a matTooltip="Author: {{externalLinkAttribute.author}}" matTooltipShowDelay="1500" *ngIf="item.searchCriteriaType=='3'" target="externalLocalization" href="{{item.startOfLink}}+{{externalLinkAttribute.author}}+{{item.endOfLink}}">{{item.linkName}}</a>
                 </span>
                 </div>
             </div>

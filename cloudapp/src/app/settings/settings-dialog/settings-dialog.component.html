@@ -4,13 +4,13 @@
     <mat-icon class="info-icon" (click)="toggleShowExample()" color="primary">info</mat-icon>
     <div *ngIf="showExample">
         <mat-divider></mat-divider><br>
-        <span>To create a link template based upon this search made in danish Netpunkt test-database:</span><br>
-        <span>http://test.netpunkt.dk/search/work?search_block_form=term.default+adj+%22<b>hans%20og%20grete</b>%22&page_id=danbib-search</span><br>
+        <span>To create a link template based upon this search made in Worldcat on "Hans Christian Andersen", as Author:</span><br>
+        <span>https://www.worldcat.org/search?q=au%3A<b>Hans+Christian+Andersen</b>&qt=advanced&dblist=638</span><br>
         <span>...you need to:</span><br><br>
-        <span><b>1. Supply Link template name:</b>This is used for labeling your search template</span><br>
-        <span><b>2. Insert Start of link:</b> http://test.netpunkt.dk/search/work?search_block_form=term.default+adj+%22</span><br>
-        <span><b>3. Choose Search Criteria Type</b> (the part of the original link, you want Alma to provide): Title</span><br>
-        <span><b>4. Insert End of link(Optional):</b> %22&page_id=danbib-search</span><br><br>
+        <span><b>1. Supply Link template name:</b> E.g. "Worldcap_Author" - this is used for labeling your search template</span><br>
+        <span><b>2. Insert Start of link:</b> https://www.worldcat.org/search?q=au%3A</span><br>
+        <span><b>3. Choose Search Criteria Type</b> (the part of the original link, you want Alma to provide): Author</span><br>
+        <span><b>4. Insert End of link(Optional):</b> &qt=advanced&dblist=638</span><br><br>
         <mat-divider></mat-divider><br>
     </div>
     <br *ngIf="!showExample">
