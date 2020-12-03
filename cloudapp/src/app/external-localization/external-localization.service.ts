@@ -13,7 +13,7 @@ constructor(private restService: CloudAppRestService){
 
     externalLinkAttributes$ = (entities: Entity[]) =>{
         let calls = entities
-            .filter(entity => entity.type.toString() == 'BORROWING_REQUEST')// ExLibris EntityType dosn't have an EntityType.BORROWING_REQUEST!??
+            .filter(entity => [EntityType.BORROWING_REQUEST].includes(entity.type))
             .map(entity => {
             return this.getRequestFromAlma(entity.link);
         })
