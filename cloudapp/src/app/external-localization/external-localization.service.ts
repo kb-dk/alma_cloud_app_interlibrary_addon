@@ -12,8 +12,9 @@ constructor(private restService: CloudAppRestService){
 }
 
     externalLinkAttributes$ = (entities: Entity[]) =>{
+        console.log('entities', entities)
         let calls = entities
-            .filter(entity => [EntityType.BORROWING_REQUEST].includes(entity.type))
+            .filter(entity => [EntityType.BORROWING_REQUEST].includes(entity.type) && !!entity.link)
             .map(entity => {
             return this.getRequestFromAlma(entity.link);
         });
@@ -21,7 +22,6 @@ constructor(private restService: CloudAppRestService){
         return (calls.length === 0) ?
             of([]) :
             forkJoin(calls).pipe(
-                catchError(err => this.handleError(err)),
                 map(almaData => almaData.map((almaData, index) => this.extractLinkAttributesFromAlmaData(almaData, index))),
             );
     };
@@ -38,8 +38,9 @@ constructor(private restService: CloudAppRestService){
     };
 
 ///bibs/99122212568805763/requests/17242965100005763
-    private getRequestFromAlma = (link) => {
-        return this.restService.call(link);
+    private getRequestFromAlma = (link: string) => {
+        return this.restService.call(link.replace('+', '%20'))
+        .pipe(catchError(err=>this.handleError(err)));
     };
 
 private handleError = (err: any) => {
@@ -49,10 +50,10 @@ private handleError = (err: any) => {
         errorMessage = `An error occurred: ${err.error.message}`;
     } else {
         // The backend returned an unsuccessful response code.
-        errorMessage = `Backend returned code ${err.status}: ${err.body.error}`;
+        errorMessage = `Backend returned code ${err.status}: ${err.message}`;
     }
     console.error(err);
-    return throwError(errorMessage);
+    return of(errorMessage);
 };
 
 }
