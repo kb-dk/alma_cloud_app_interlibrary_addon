@@ -4,8 +4,7 @@
    "description": "Adding extra functionality related to inter-library activities - for at start templates for external localization of Borrowing Request materials. ",
    "author": "Royal Danish Libraty, Denmark",
    "pages": {
-      "settings": "/#/settings",
-      "help": "https://developers.exlibrisgroup.com/?post_type=appcenter&p=68351"
+      "settings": "/#/settings"
    },
    "icon": {
       "type": "font",
