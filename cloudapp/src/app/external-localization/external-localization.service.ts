@@ -12,7 +12,6 @@ constructor(private restService: CloudAppRestService){
 }
 
     externalLinkAttributes$ = (entities: Entity[]) =>{
-        console.log('entities', entities)
         let calls = entities
             .filter(entity => [EntityType.BORROWING_REQUEST].includes(entity.type) && !!entity.link)
             .map(entity => {
