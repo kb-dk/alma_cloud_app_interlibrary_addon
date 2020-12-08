@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import {CUSTOM_ELEMENTS_SCHEMA, NgModule} from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
 import { BrowserModule, Title } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -15,6 +15,7 @@ import { SettingsComponent } from "./settings/settings.component";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { ExternalLocalizationService } from "./external-localization/external-localization.service";
 import { SettingsDialogComponent } from './settings/settings-dialog/settings-dialog.component';
+import { MultiSelectComponent } from './multi-select/multi-select.component';
 
 export function getToastrModule() {
   return ToastrModule.forRoot({
@@ -32,6 +33,7 @@ export function getToastrModule() {
     SettingsDialogComponent,
     ExternalLocalizationComponent,
     TruncatePipe,
+    MultiSelectComponent,
   ],
   entryComponents: [
     SettingsDialogComponent
@@ -48,7 +50,10 @@ export function getToastrModule() {
     getToastrModule()
   ],
   providers: [Title, ExternalLocalizationService],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
+  schemas: [
+    CUSTOM_ELEMENTS_SCHEMA
+  ]
 })
 
 export class AppModule { }
