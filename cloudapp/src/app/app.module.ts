@@ -16,6 +16,7 @@ import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { ExternalLocalizationService } from "./external-localization/external-localization.service";
 import { SettingsDialogComponent } from './settings/settings-dialog/settings-dialog.component';
 import { MultiSelectComponent } from './multi-select/multi-select.component';
+import { UpdateAndUnassignComponent } from './update-and-unassign/update-and-unassign.component';
 
 export function getToastrModule() {
   return ToastrModule.forRoot({
@@ -34,6 +35,7 @@ export function getToastrModule() {
     ExternalLocalizationComponent,
     TruncatePipe,
     MultiSelectComponent,
+    UpdateAndUnassignComponent,
   ],
   entryComponents: [
     SettingsDialogComponent
