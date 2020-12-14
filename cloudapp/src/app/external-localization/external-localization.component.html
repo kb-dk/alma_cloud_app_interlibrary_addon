@@ -2,7 +2,7 @@
 
 <div *ngIf="!settingsExists() else showTable">
     <span>You have not created any 'Link templates' in the settings section of this cloud app.</span><br>
-    <b><a href="/#/settings">Add link templates</a></b><br><br>
+    <b><a [routerLink]="['/settings']">Add link templates</a></b><br><br>
 </div>
 
 <ng-template #showTable>
