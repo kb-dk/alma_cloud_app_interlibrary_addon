@@ -15,7 +15,7 @@
         <mat-icon matListIcon (click)="remove(item)">delete</mat-icon>
       </mat-list-item>
     </mat-list>
-    <b><a href="#/external-localization">Jump to external localization page.</a></b>
+    <b><a [routerLink]="['/external-localization']">Jump to external localization page.</a></b>
   </div>
 
 <ng-template #noExternalLinkTemplates>

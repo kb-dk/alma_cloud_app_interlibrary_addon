@@ -17,6 +17,7 @@ import { ExternalLocalizationService } from "./external-localization/external-lo
 import { SettingsDialogComponent } from './settings/settings-dialog/settings-dialog.component';
 import { MultiSelectComponent } from './multi-select/multi-select.component';
 import { UpdateAndUnassignComponent } from './update-and-unassign/update-and-unassign.component';
+import {SelectEntitiesComponent} from "./multi-select/select-entities/select-entities.component";
 
 export function getToastrModule() {
   return ToastrModule.forRoot({
@@ -35,6 +36,7 @@ export function getToastrModule() {
     ExternalLocalizationComponent,
     TruncatePipe,
     MultiSelectComponent,
+    SelectEntitiesComponent,
     UpdateAndUnassignComponent,
   ],
   entryComponents: [
