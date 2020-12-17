@@ -16,8 +16,8 @@ import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { ExternalLocalizationService } from "./external-localization/external-localization.service";
 import { SettingsDialogComponent } from './settings/settings-dialog/settings-dialog.component';
 import { MultiSelectComponent } from './multi-select/multi-select.component';
-import { UpdateAndUnassignComponent } from './update-and-unassign/update-and-unassign.component';
 import {SelectEntitiesComponent} from "./multi-select/select-entities/select-entities.component";
+import { ConvertToDigitalComponent } from './convert-to-digital/convert-to-digital.component';
 
 export function getToastrModule() {
   return ToastrModule.forRoot({
@@ -37,10 +37,10 @@ export function getToastrModule() {
     TruncatePipe,
     MultiSelectComponent,
     SelectEntitiesComponent,
-    UpdateAndUnassignComponent,
+    ConvertToDigitalComponent,
   ],
   entryComponents: [
-    SettingsDialogComponent
+    SettingsDialogComponent,
   ],
   imports: [
     MaterialModule,
@@ -51,9 +51,12 @@ export function getToastrModule() {
     FormsModule,
     ReactiveFormsModule,
     getTranslateModule(),
-    getToastrModule()
+    getToastrModule(),
   ],
-  providers: [Title, ExternalLocalizationService],
+  providers: [
+    Title,
+    ExternalLocalizationService,
+  ],
   bootstrap: [AppComponent],
   schemas: [
     CUSTOM_ELEMENTS_SCHEMA

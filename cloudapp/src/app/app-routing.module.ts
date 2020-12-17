@@ -4,12 +4,12 @@ import { MainComponent } from './main/main.component';
 import { ExternalLocalizationComponent } from "./external-localization/external-localization.component";
 import { SettingsComponent } from "./settings/settings.component";
 import {MultiSelectComponent} from "./multi-select/multi-select.component";
-import {UpdateAndUnassignComponent} from "./update-and-unassign/update-and-unassign.component";
+import {ConvertToDigitalComponent} from "./convert-to-digital/convert-to-digital.component";
 
 const routes: Routes = [
   { path: '', component: MainComponent },
   { path: 'external-localization', component: ExternalLocalizationComponent },
-  { path: 'update-and-unassign', component: UpdateAndUnassignComponent },
+  { path: 'convert-to-digital', component: ConvertToDigitalComponent },
   { path: 'multi-select', component: MultiSelectComponent },
   { path: 'settings', component: SettingsComponent },
 ];

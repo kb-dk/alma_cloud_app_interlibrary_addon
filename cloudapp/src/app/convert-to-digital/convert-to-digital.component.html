@@ -1,0 +1,64 @@
+<!--<app-topmenu></app-topmenu>-->
+<div *ngIf="!hasRSRequest && !chooseFromList">
+    <p>
+        To use this app, navigate to the Borrowing Requests page in Alma.
+        From there is will be possible to change a Book Request to an Article Request and vice versa.
+    </p>
+</div>
+<div class="eca-actions" *ngIf="hasRSRequest">
+    <button mat-flat-button color="primary" (click)="changeType()" [disabled]="!isChangeable">
+        Change to {{citationTypeCode ==='BK' ? 'an' : 'a'}} {{ citationTypeMap.get(bookToArticalSwap.get(citationTypeCode)) }} request
+    </button>
+</div>
+
+<div class="align-center">
+    <h2 [innerHTML]='title'></h2>
+</div>
+
+<div class="loading-shade" *ngIf="loading">
+    <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
+</div>
+
+<div *ngIf="chooseFromList" >
+    <mat-form-field>
+        <mat-label>Select a resource sharing request</mat-label>
+        <mat-select (selectionChange)="onLoadEntity($event.value)">
+            <mat-option *ngFor="let entity of pageEntities" [value]="entity">
+                {{entity.description| truncate : 50}} - {{entity.id}}
+            </mat-option>
+        </mat-select>
+    </mat-form-field>
+</div>
+
+
+
+
+<div class="example-container">
+    <div class="form-container">
+        <form [formGroup]='formConvertHelper.getForm()' (submit)="submit()">
+            <mat-form-field class="form-field" appearance="outline">
+                <mat-label>User Id</mat-label>
+                <input matInput formControlName="userId" type="text">
+            </mat-form-field>
+            <mat-form-field class="form-field" appearance="outline">
+                <mat-label>Request Id</mat-label>
+                <input matInput formControlName="requestId" type="text">
+            </mat-form-field>
+            <mat-form-field class="form-field" appearance="outline" [hidden]="!formConvertHelper.isRequestSelected()">
+                <mat-label>Record Id</mat-label>
+                <input matInput formControlName="recordId" type="text">
+            </mat-form-field>
+            <mat-form-field class="form-field" appearance="outline">
+                <mat-label>Item Id</mat-label>
+                <input matInput formControlName="itemId" type="text">
+            </mat-form-field>
+            <!--
+                            <mat-error *ngIf="loginForm.controls.password.touched && loginForm.controls.password.invalid">
+                                <span *ngIf="loginForm.controls.password.errors.required">This field is mandatory.</span>
+                            </mat-error>
+            -->
+            <button mat-raised-button color="primary" type="submit">Convert to digitization request</button>
+            <button mat-raised-button color="secondary" (click)="resetForm()">Cancel</button>
+        </form>
+    </div>
+</div>
