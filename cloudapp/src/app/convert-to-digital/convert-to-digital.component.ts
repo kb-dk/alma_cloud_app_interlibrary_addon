@@ -1,12 +1,18 @@
-import { Subscription } from 'rxjs';
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import {Subscription} from 'rxjs';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {
-  CloudAppRestService, CloudAppEventsService, Request, HttpMethod,
-  Entity, PageInfo, RestErrorResponse, AlertService
+  CloudAppEventsService,
+  CloudAppRestService,
+  Entity,
+  HttpMethod,
+  PageInfo,
+  Request,
+  RestErrorResponse
 } from '@exlibris/exl-cloudapp-angular-lib';
 import {AppService} from "../app.service";
-import {FormBuilder, FormControl, FormGroup} from "@angular/forms";
+import {FormBuilder} from "@angular/forms";
 import {FormGroupConvertHelper} from "./formGroupConvertHelper";
+import {ToastrService} from "ngx-toastr";
 
 @Component({
   selector: 'app-convert-to-digital',
@@ -41,13 +47,13 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
   constructor(private appService: AppService,
               private restService: CloudAppRestService,
               private eventsService: CloudAppEventsService,
-              private alert : AlertService,
+              private toastr: ToastrService,
               private formBuilder: FormBuilder)
   { }
 
   ngOnInit() {
-    this.formConvertHelper = new FormGroupConvertHelper();
     this.appService.setTitle('Convert Borrowing Request to Digitization');
+    this.formConvertHelper = new FormGroupConvertHelper();
     this.pageLoad$ = this.eventsService.onPageLoad(this.onPageLoad);
   }
 
@@ -77,35 +83,22 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
     console.log('title' + this.title);
     if ((this.pageEntities || []).length > 1 && this.pageEntities[0].type === 'BORROWING_REQUEST') {
       //list of Borrowing Requests
-      console.log('choose From List ' + (this.pageEntities || []).length );
       this.chooseFromList = true;
     } else if ((this.pageEntities || []).length == 1  && this.pageEntities[0].type === 'BORROWING_REQUEST') {
-      console.log('title' + this.title);
       this.onLoadEntity(pageInfo.entities[0]);
     }
   }
 
-
-
   onLoadEntity(entity : Entity){
-    console.log ("onLoadEntity: " + entity.link);
-    console.log('entity: ' + JSON.stringify(entity));
     this.hasRSRequest = true;
     this.link = entity.link;
-    console.log('Sending API GET request ' + this.link );
     this.restService.call(entity.link).subscribe(result => {
       this.apiResult = result;
       let userId:string = JSON.stringify(result['requester']['value']);
       let requestId:string = JSON.stringify(result['request_id']);
-
-      let tmpUserId: FormControl = new FormControl([{value: 'Updated: ' + userId, disabled: true}])
-      let tmpRequestId: FormControl = new FormControl([{value: 'Updated: ' + requestId, disabled: true}])
       this.formConvertHelper.updateRequest(userId, requestId);
-
-      // this.form.setValue({userId: userId.replace(new RegExp('"', 'g'), ''), requestId: requestId.replace(new RegExp('"', 'g'), '')});
       this.citationTypeCode = result['citation_type']['value'];
       var aOrAn:string = this.citationTypeCode ==='BK' ? 'a' : 'an';
-      console.log('title' + result['title']);
       if(result['status']['value'] === 'READY_TO_SEND' || result['status']['value'] === 'REQUEST_CREATED_BOR'){
         this.title = "Detected request for " + aOrAn +' '+ this.citationTypeMap.get(this.citationTypeCode)+ ' - '+ result['title'];
         this.isChangeable = true;
@@ -121,7 +114,6 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.isChangeable = false;
     const postBody = { ...this.apiResult }
-
     this.deleteExtraFields(postBody);
     if(this.citationTypeCode === 'BK'){
       this.changeToArticle(postBody);
@@ -129,7 +121,6 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
       this.changeToBook(postBody);
     }
     this.changeLog = this.changeLog + "<br>Deleted old request (" + this.apiResult['request_id'] + ")<br>";
-    console.log(this.changeLog);
 
 
     // call post request
@@ -139,22 +130,16 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
     // wait for post
     (async () => {
       while (!this.hasApiResult) { // The loop is not for waiting for post request to end.
-        console.log('before hasApiResult');
         await this.delay(1000);
       }
       if (this.apiResult && Object.keys(this.apiResult).length > 0) {//no error
         //delete the old request
-        console.log('after hasApiResult');
-        console.log('delete the old request');
         this.sendDeleteRequest(this.link + '?remove_request=true');
       }else{
-        console.log('not deleting old request');
         this.loading = false;
       }
     })();
   }
-
-
 
   deleteExtraFields(value: JSON) {
     delete value['request_id'];
@@ -207,10 +192,8 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
 
     this.changeLog = this.changeLog + "Creating new request ...<br>";
     this.changeLog = this.changeLog + "-CR -> BK<br>";
-
     this.changeLog = this.changeLog + "-<b>Article\\Chapter Title:</b> "+value['title']+' -> <b>Title</b><br>';
     value['journal_title'] = "";
-
     value['isbn'] = value['issn'];
     value['issn'] = "";
     this.changeLog = this.changeLog + "-<b>ISSN:</b> "+value['isbn']+" -> <b>ISBN</b><br>";
@@ -225,7 +208,6 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
     if(value['chapter']){
       this.changeLog = this.changeLog + "-<b>Chapter:</b> "+value['chapter']+' -> <b>Chapter number</b><br>';
     }
-
   }
 
   private sendCreateRequest({ url, requestBody }: { url: string; requestBody: any; }) {
@@ -234,23 +216,18 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
       method: HttpMethod.POST,
       requestBody
     };
-    console.log('Sending API POST request ' + url );
     this.restService.call(request).subscribe({
       next: result => {
         this.apiResult = result;
         // replace new id with request_id
         this.changeLog = this.changeLog.replace('Creating new request ...','Created new request (' + (this.apiResult['request_id']) + ')<br>');
-        console.log(this.changeLog);
         this.hasApiResult = true;
-        console.log('finished creating request');
       },
       error: (e: RestErrorResponse) => {
         this.apiResult = {};
-        console.log("Failed to create resource sharing request");
-        console.error(e);
         this.changeLog = this.changeLog.replace('Deleted old request','Not deleting old request');
         this.changeLog = this.changeLog.replace('Creating new request ...','<b>' + e.message + '</b><br>');
-        this.alert.error('<b>Failed to create resource sharing request</b>' + this.changeLog, {autoClose: false,keepAfterRouteChange: true});
+        this.toastr.error('<b>Failed to create resource sharing request</b>' + this.changeLog);
         this.title ="";
         this.refreshPage();
       }
@@ -264,21 +241,17 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
       method: HttpMethod.DELETE,
       requestBody : null
     };
-    console.log('Sending API DELETE request ' + deleteUrl);
     this.restService.call(request).subscribe({
       next: result => {
         this.loading = false;
-        console.log("Success deleting " + deleteUrl);
-        this.alert.success('<b>Success changing types!</b>\n' +this.changeLog, {autoClose: false,keepAfterRouteChange: true});
+        this.toastr.success('<b>Success changing types!</b>\n' +this.changeLog);
         if(this.chooseFromList){
           this.refreshPage();
         }
       },
       error: (e: RestErrorResponse) => {
         this.apiResult = {};
-        console.log("Failed to delete resource sharing request");
-        this.alert.error('<b>Failed to delete resource sharing request</b> <br>' +e.message + this.changeLog, {autoClose: false,keepAfterRouteChange: true});
-        console.error(e);
+        this.toastr.error('<b>Failed to delete resource sharing request</b> <br>' +e.message + this.changeLog);
         this.refreshPage();
       }
     });
@@ -293,17 +266,21 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
     this.eventsService.refreshPage().subscribe({
       error: e => {
         console.error(e);
-        this.alert.error('Failed to refresh page');
+        this.toastr.error('Failed to refresh page');
       },
       complete: () => this.loading = false
     });
   }
 
   submit() {
-    console.log('Form value: ' + JSON.stringify(this.formConvertHelper.getForm().value));
+    const message = 'Raw value: ' + JSON.stringify(this.formConvertHelper.getForm().getRawValue());
+    // this.toastr.error(message)
+    this.toastr.success(message)
   }
 
   resetForm() {
-    this.formConvertHelper = new FormGroupConvertHelper();
+    this.ngOnInit();
+    //this.onLoadEntity(this.pageEntities[0]); TODO: spiller ikke!!!
+    //this.formConvertHelper = new FormGroupConvertHelper();
   }
 }

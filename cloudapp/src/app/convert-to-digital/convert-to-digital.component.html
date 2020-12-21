@@ -1,4 +1,4 @@
-<!--<app-topmenu></app-topmenu>-->
+<app-topmenu></app-topmenu>
 <div *ngIf="!hasRSRequest && !chooseFromList">
     <p>
         To use this app, navigate to the Borrowing Requests page in Alma.
@@ -12,53 +12,58 @@
 </div>
 
 <div class="align-center">
-    <h2 [innerHTML]='title'></h2>
+    <h4 [innerHTML]='title'></h4>
 </div>
 
 <div class="loading-shade" *ngIf="loading">
     <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
 </div>
 
-<div *ngIf="chooseFromList" >
-    <mat-form-field>
-        <mat-label>Select a resource sharing request</mat-label>
-        <mat-select (selectionChange)="onLoadEntity($event.value)">
-            <mat-option *ngFor="let entity of pageEntities" [value]="entity">
-                {{entity.description| truncate : 50}} - {{entity.id}}
-            </mat-option>
-        </mat-select>
-    </mat-form-field>
-</div>
-
-
-
-
 <div class="example-container">
     <div class="form-container">
         <form [formGroup]='formConvertHelper.getForm()' (submit)="submit()">
+            <div *ngIf="chooseFromList" >
+                <h4 [hidden]="!formConvertHelper.isRequestSelected()">Select Borrowing Request</h4>
+                <mat-form-field appearance="outline">
+                    <mat-label>Select borrowing request</mat-label>
+                    <mat-select (selectionChange)="onLoadEntity($event.value)" >
+                        <mat-option [value]="0">None</mat-option>
+                        <mat-option *ngFor="let entity of pageEntities" [value]="entity">
+                            {{entity.description| truncate : 50}} - {{entity.id}}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+
             <mat-form-field class="form-field" appearance="outline">
                 <mat-label>User Id</mat-label>
-                <input matInput formControlName="userId" type="text">
+                <input matInput formControlName="userId" type="text" [required]="true">
             </mat-form-field>
             <mat-form-field class="form-field" appearance="outline">
                 <mat-label>Request Id</mat-label>
-                <input matInput formControlName="requestId" type="text">
+                <input matInput formControlName="requestId" type="text" [required]="true">
             </mat-form-field>
-            <mat-form-field class="form-field" appearance="outline" [hidden]="!formConvertHelper.isRequestSelected()">
-                <mat-label>Record Id</mat-label>
-                <input matInput formControlName="recordId" type="text">
-            </mat-form-field>
-            <mat-form-field class="form-field" appearance="outline">
-                <mat-label>Item Id</mat-label>
-                <input matInput formControlName="itemId" type="text">
-            </mat-form-field>
+            <div [hidden]="formConvertHelper.isRequestSelected()">
+                <h4>Find local ressource with 'View Local Resssouce' for the Borrowing Request in question</h4>
+                <mat-form-field class="form-field" appearance="outline" [hidden]="formConvertHelper.isRequestSelected()">
+                    <mat-label>Record Id</mat-label>
+                    <input matInput formControlName="recordId" type="text" [required]="true">
+                </mat-form-field>
+                <mat-form-field class="form-field" appearance="outline">
+                    <mat-label>Item Id</mat-label>
+                    <input matInput formControlName="itemId" type="text" [required]="" >
+                </mat-form-field>
+            </div>
             <!--
                             <mat-error *ngIf="loginForm.controls.password.touched && loginForm.controls.password.invalid">
                                 <span *ngIf="loginForm.controls.password.errors.required">This field is mandatory.</span>
                             </mat-error>
             -->
             <button mat-raised-button color="primary" type="submit">Convert to digitization request</button>
-            <button mat-raised-button color="secondary" (click)="resetForm()">Cancel</button>
+            <button mat-raised-button color="secondary" (click)="resetForm()">Reset</button>
         </form>
+<!--        <button (click)="resetForm()">Test</button>  TODO: select-box nulstilles ikke -->
     </div>
 </div>
+
+
