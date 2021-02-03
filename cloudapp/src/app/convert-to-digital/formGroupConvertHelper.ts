@@ -12,11 +12,10 @@ export class FormGroupConvertHelper implements FormGroupConvertHelperInterface{
         this._form = formBuilder.group({
             userId: [{value: '', disabled: false}],
             requestId: [{value: '', disabled: false}],
-            recordId: [{value: '', disabled: true}],
-            itemId: [{value: '', disabled: true}],
             mmsId:[{value: '', disabled: true}],
+            itemId: [{value: '', disabled: true}],
             isRequestOk: false,
-            isBibOk: false,
+            isMmsAndItemOk: false,
         });
     }
 
@@ -25,44 +24,29 @@ export class FormGroupConvertHelper implements FormGroupConvertHelperInterface{
         const formGroup = formBuilder.group({
             userId: [{value: this.clean(userId), disabled: true}],
             requestId: [{value: this.clean(requestId), disabled: true}],
-            recordId: '',
-            itemId: '',
             mmsId: '',
+            itemId: '',
+            // itemId: [{value: '', disabled: true}],
             isRequestOk: true,
-            isBibOk: false,
+            isMmsAndItemOk: false,
         });
         this.setForm(formGroup);
         console.log('updateFormWithRequestData: ', userId + '  ' + requestId);
     }
 
-    public updateFormWithBibData (recordId: string, itemId: string) {
-        let formBuilder: FormBuilder = new FormBuilder();
-        const formGroup = formBuilder.group({
-            userId: [{value: this._form.get('userId').value, disabled: true}],
-            requestId: [{value: this._form.get('requestId').value, disabled: true}],
-            recordId: [{value: this.clean(recordId), disabled: true}],
-            itemId: [{value: this.clean(itemId), disabled: true}],
-            isRequestOk: true,
-            isBibOk: true,
-        });
-        this.setForm(formGroup);
-        console.log('updateFormWithBibData: ', recordId + '  ' + itemId);
-    }
-
-    public updateFormWithItemData (itemId: string, mmsId: string) {
+    public updateFormWithMmsAndItemId (itemId: string, mmsId: string) {
         console.log('this._form.get(mmsId): ', this._form.get('mmsId'));
         let formBuilder: FormBuilder = new FormBuilder();
         const formGroup = formBuilder.group({
             userId: [{value: this._form.get('userId').value, disabled: true}],
             requestId: [{value: this._form.get('requestId').value, disabled: true}],
-            recordId: [{value: this._form.get('recordId'), disabled: true}],
-            itemId: [{value: this.clean(itemId), disabled: true}],
             mmsId: [{value: this.clean(mmsId), disabled: true}],
+            itemId: [{value: this.clean(itemId), disabled: true}],
             isRequestOk: true,
-            isBibOk: true,
+            isMmsAndItemOk: true,
         });
         this.setForm(formGroup);
-        console.log('updateFormWithItem: ' + itemId);
+        console.log('update form with mmsId: ' + mmsId + ' and itemId: ' + itemId);
     }
 
     public getForm(): FormGroup { return this._form;}
@@ -70,8 +54,8 @@ export class FormGroupConvertHelper implements FormGroupConvertHelperInterface{
     public isRequestSelected(): boolean{
         return !this._form.get('isRequestOk').value;
     }
-    public isBibSelected(): boolean{
-        return !this._form.get('isBibOk').value;
+    public isMmsAndItemIdOK(): boolean{
+        return !this._form.get('isMmsAndItemOk').value;
     }
 
     private clean(stringToBeCleaned: string) {

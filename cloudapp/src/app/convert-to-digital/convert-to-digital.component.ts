@@ -14,6 +14,7 @@ import {AppService} from "../app.service";
 import {FormBuilder} from "@angular/forms";
 import {FormGroupConvertHelper} from "./formGroupConvertHelper";
 import {ToastrService} from "ngx-toastr";
+import * as url from "url";
 
 @Component({
   selector: 'app-convert-to-digital',
@@ -28,7 +29,6 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
 
   citationTypeCode:string;
   borrowingRequestSelected: boolean = false;
-  bibItemSelected: boolean = false;
   showBorrowingRequestSelectbox : boolean = false;
   showBibSelectbox : boolean = false;
   isChangeable :boolean = false;
@@ -41,9 +41,10 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
   selectedItemTitle: string = '';
   showExample: boolean = false;
   formConvertHelper: FormGroupConvertHelper;
-  toTextArea:string = '';
+  toTextArea:any = '';
   selectedBorrowingRequest: string = '';
   tmpItemId: string = '';
+  itemIdFoundOnAlmaPage:boolean = false;
 
   public bookToArticalSwap:Map<string, string> = new Map([
     ["BK", "CR"],
@@ -66,7 +67,7 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
     this.appService.setTitle('Convert Borrowing Request to Digitization');
     this.formConvertHelper = new FormGroupConvertHelper();
     this.pageLoad$ = this.eventsService.onPageLoad(this.onPageLoad);
-    this.tmpItemId
+    this.tmpItemId = ""
   }
 
   ngOnDestroy(): void {
@@ -83,48 +84,44 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
   }
 
   onPageLoad = (pageInfo: PageInfo) => {
+    this.itemIdFoundOnAlmaPage = false;
     this.pageEntities = pageInfo.entities;
     if(!this.borrowingRequestSelected){
       this.initPage(pageInfo);
     }
     const numberOfEntities = this.pageEntities.length;
-    console.log('numberOfEntities(): ', numberOfEntities);
     if(numberOfEntities >= 1){
       const typeOfFirstEntity = this.pageEntities[0].type;
       if(typeOfFirstEntity === EntityType.BORROWING_REQUEST) {
-        this.handleBorrowingRequest(numberOfEntities, pageInfo);
+        this.handleBorrowingRequestTypeEntities(numberOfEntities, pageInfo);
       }else if(typeOfFirstEntity === EntityType.ITEM){
-
-        const newTmpItemId = this.pageEntities[0].id;
-        if(this.tmpItemId!== newTmpItemId){
-          this.toastr.success('ItemId updatet from ' + this.tmpItemId + ' to ' + newTmpItemId);
-          this.tmpItemId = newTmpItemId;
-        }
-
-      // }else if(typeOfFirstEntity === EntityType.BIB_MMS){
+        this.handleItemTypeEntities();
+        // }else if(typeOfFirstEntity === EntityType.BIB_MMS){
       //   this.handleBibData(numberOfEntities, pageInfo);
       }
     }
   }
 
-  private handleBorrowingRequest(numberOfEntities: number, pageInfo: PageInfo) {
+  private handleItemTypeEntities() {
+    this.toastr.success("handleItemTypeEntities")
+    this.showItemType = this.pageEntities[0].type;
+    this.showNumberOfItem = this.pageEntities.length;
+    if(this.pageEntities.length== 1){
+      const newTmpItemId = this.pageEntities[0].id;
+      if (this.tmpItemId !== newTmpItemId) {
+        this.itemIdFoundOnAlmaPage = true;
+        this.toastr.success('ItemId updated from ' + this.tmpItemId + ' to ' + newTmpItemId);
+        this.tmpItemId = newTmpItemId;
+      }
+    }
+  }
+
+  private handleBorrowingRequestTypeEntities(numberOfEntities: number, pageInfo: PageInfo) {
     if (numberOfEntities > 1) {
       this.infoText = 'Select Borrowing Request';
       this.showBorrowingRequestSelectbox = true;
     } else {
       this.findBorrowingRequestData(pageInfo.entities[0]);
-    }
-  }
-
-  private handleBibData(numberOfEntities: number, pageInfo: PageInfo) {
-    if (numberOfEntities == 1) {
-      console.log('handleBibData: Der er kun fundet en Entity ', );
-      this.findBibData(pageInfo.entities[0]);
-      this.infoText = 'Ready to convert to digitization';
-    } else {
-      console.log('handleBibData: Der er fundet flere Entities ', );
-      this.showBibSelectbox = true;
-      this.infoText = 'Der er fundet entries af typen: ' + pageInfo.entities[0].type;
     }
   }
 
@@ -159,51 +156,10 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
         this.isChangeable = true;
         this.showBorrowingRequestSelectbox = false;
         this.selectedBorrowingRequest = JSON.stringify(result);
-        this.toTextArea= this.selectedBorrowingRequest;
+        this.toTextArea= "BORROWING-REQUEST" + this.selectedBorrowingRequest;
       }else{
         this.infoText = 'Borrowing request with status "'+result['status']['desc'] +'" can\'t be changed';
       }
-    });
-  }
-
-
-
-
-  convertToDigitizationRequest() {
-    var getUserRequestUrl = '/' + this.selectedUserRequestlink.split('/').slice(3).join('/').replace('"','');
-    this.restService.call(getUserRequestUrl).subscribe(result => {
-      this._resultFromGetUserRequestApiCall = JSON.stringify(result);
-      this.toTextArea = this._resultFromGetUserRequestApiCall;
-      const digitizationRequestBody = this.createDigitizationRequestBody();
-      var createDigitizationUrl:string = '';
-      console.log('this.tempText(getUserRequest): ', this.toTextArea);
-    });
-  }
-
-
-
-
-
-
-
-  findBibData(entity : Entity){
-    console.log('findBibData ramt', );
-    this.bibItemSelected = true;
-    this.selectedBorrowingRequestlink = entity.link;
-    this.restService.call(entity.link).subscribe(result => {
-      console.log('entity.link(): ', entity.link);
-      console.log('JSON.stringify(result)(): ', JSON.stringify(result));
-      this.apiResultBorrowingRequestLink = result;
-      // this.citationTypeCode = result['citation_type']['value'];
-      // if(result['status']['value'] === 'REQUEST_CREATED_BOR'){
-        this.updateFormWithBibValues(result);
-        this.selectedItemTitle = '<b>Selected item:</b> ' + entity.description;
-        this.infoText = 'Find local ressource with "View Local Ressource" for the selected item in Alma';
-        this.isChangeable = true;
-        this.showBorrowingRequestSelectbox = false;
-      // }else{
-      //   this.infoText = 'Borrowing request with status "'+result['status']['desc'] +'" can\'t be changed';
-      // }
     });
   }
 
@@ -213,64 +169,6 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
     this.formConvertHelper.updateFormWithRequestData(userId, requestId);
   }
 
-  private updateFormWithBibValues(result) {
-    let recordId: string = JSON.stringify(result['linked_record_id']['value']);
-    let itemId: string = 'To be found';//JSON.stringify(result['request_id']);''
-    this.formConvertHelper.updateFormWithBibData(recordId, itemId);
-  }
-
-  changeType(){
-    // this.loading = true;
-    this.isChangeable = false;
-    const postBody = { ...this.apiResultBorrowingRequestLink }
-    console.log('postBody(Før): ', postBody);
-    this.deleteIrrelevantFields(postBody);
-    if(this.citationTypeCode === 'BK'){//bør kunne fjernes, når der er ryddet op.
-      this.changeToArticle(postBody);
-    }
-    // console.log('postBody(Efter): ', postBody);
-   // call post request
-   //  console.log('this.selectedBorrowingRequestlink(): ', this.selectedBorrowingRequestlink);// /users/88118796/resource-sharing-requests/22262131590005763
-    var url = this.selectedBorrowingRequestlink.split('/').slice(0, -1).join('/');// /users/88118796/resource-sharing-requests
-    console.log('Gør klar til at sende create med url(): ', url);
-         this.hasApiResult = false;
-        this.sendCreateRequest({ url, requestBody: postBody});
-        // wait for post
-        (async () => {
-          while (!this.hasApiResult) { // The loop is not for waiting for post request to end.
-            await this.delay(1000);
-          }
-/*
-          if (this.apiResult && Object.keys(this.apiResult).length > 0) {//no error
-            //delete the old request
-            this.sendDeleteRequest(this.selectedBorrowingRequestlink + '?remove_request=true');
-          }else{
-            this.loading = false;
-          }
-*/
-        })();
-  }
-
-
-  changeToArticle(value: any) {
-    value['citation_type']['value'] = 'CR';
-    value['chapter_title'] = "";
-    if( value['chapter_author']){
-      value['author'] = value['chapter_author'];
-    }
-    value['issn'] = value['isbn'];
-    value['isbn'] = "";
-
-    //volume & issue split
-    if( value['volume'].includes(",")){
-      var volume: string[] = value['volume'].split(",");
-      value['issue'] = volume.length > 1 ? (volume.slice(-1)+'').trim() : "" ;
-      value['volume'] = volume.length > 1 ? volume.slice(0, -1).join(',') : volume+'';
-    }
-    if( value['part']){
-      value['volume'] = value['volume']  + " " + value['part'];
-    }
-  }
 
   private sendCreateRequest({ url, requestBody }: { url: string; requestBody: any; }) {
     let request: Request = {
@@ -279,13 +177,13 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
       requestBody
     };
     console.log('requestBody(sendCreateRequest (ORIGINAL)): ', requestBody);
-/*
     this.restService.call(request).subscribe({
       next: result => {
         this.apiResultBorrowingRequestLink = result;
         // replace new id with request_id
         this.changeLog = this.changeLog.replace('Creating new request ...','Created new request (' + (this.apiResultBorrowingRequestLink['request_id']) + ')<br>');
         this.hasApiResult = true;
+        this.toastr.success("request ok");
       },
       error: (e: RestErrorResponse) => {
         this.apiResultBorrowingRequestLink = {};
@@ -296,7 +194,6 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
         this.refreshPage();
       }
     });
-*/
   }
 
   sendDeleteRequest(deleteUrl: string) {
@@ -335,15 +232,33 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
       complete: () => this.loading = false
     });
   }
+  showItemType: any;
+  showNumberOfItem: any;
 
   submit() {
     const message = 'Raw value: ' + JSON.stringify(this.formConvertHelper.getForm().getRawValue());
-    console.log('mmsId(): ', this.formConvertHelper.getMmsId());
-    // this.toastr.error(message)
-    // this.changeType()
     this.toTextArea = message;
     this.convertToDigitizationRequest();
 
+  }
+
+  convertToDigitizationRequest() {
+        // ?user_id_type=all_unique&mms_id=99122724060705763&item_pid=231907048530005763&apikey=l8xxc1629b20fc544089a474aa348651898f
+
+    var paramString = "?user_id_type=all_unique&mms_id=" + this.formConvertHelper.getMmsId() + "&item_pid=" + this.formConvertHelper.getItemId();
+    console.log('paramString(): ', paramString);
+
+    var getUserRequestUrl = '/' + this.selectedUserRequestlink.split('/').slice(3).join('/').replace('"','') + paramString;
+    console.log('getUserRequestUrl(): ', getUserRequestUrl);
+    this.restService.call(getUserRequestUrl).subscribe(result => {
+      this._resultFromGetUserRequestApiCall = JSON.stringify(result);
+      const requestBody = {...this.createDigitizationRequestBody()};
+      var paramString = "?user_id_type=all_unique&mms_id=" + this.formConvertHelper.getMmsId() + "&item_pid=" + this.formConvertHelper.getItemId();
+      const url:any = '/almaws/v1/users/' + this.apiResultBorrowingRequestLink['requester']['value'] + '/requests' + paramString;
+      console.log('url(): ', url);// Ex: /almaws/v1/users/88118796/requests
+      this.toTextArea = "DIGITIZATION" + JSON.stringify(requestBody);
+      this.sendCreateRequest( {url, requestBody});
+    });
   }
 
   resetForm() {
@@ -357,69 +272,56 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
     this.showExample = !this.showExample;
   }
 
-  deleteIrrelevantFields(value: JSON) {
-    delete value['request_id'];
-    delete value['external_id'];
-    delete value['created_date'];
-    delete value['last_modified_date'];
-    delete value['created_time'];
-    delete value['last_modified_time'];
-    delete value['user_request'];
-  }
-
   createDigitizationRequestBody() {
     var digitizationRequestBody = Object.create(null);
     this.addProperty(digitizationRequestBody, "user_primary_id", this.apiResultBorrowingRequestLink['requester']['value']);
-    const lastInterestDate = this.apiResultBorrowingRequestLink['last_interest_date'];
-    var date = Object.create(null);
-    var defaultDate:Date = new Date("1 1 2099");
-    date = lastInterestDate==null ? defaultDate : lastInterestDate;
-    this.addProperty(digitizationRequestBody, 'last_interest_date', date);
+    this.setLastInterestDate(digitizationRequestBody);
     this.addProperty(digitizationRequestBody,"request_type","DIGITIZATION");
-    var requestSubType = Object.create(null);
-    this.addProperty(requestSubType, 'value', 'PHYSICAL_TO_DIGITIZATION');
-    this.addProperty(digitizationRequestBody, 'request_sub_type', requestSubType);
+    this.setRequestSubtype(digitizationRequestBody);
     this.addProperty(digitizationRequestBody, 'mms_id', this.formConvertHelper.getMmsId()); //from submittet form
     this.addProperty(digitizationRequestBody, 'item_id',this.formConvertHelper.getItemId()); //from submittet form
-    var targetDestinationObject = Object.create(null);
-    this.addProperty(targetDestinationObject, '#text', 'DIGI_DEPT_INST');
-    this.addProperty(digitizationRequestBody, 'target_destination', targetDestinationObject);
+    this.setTargetDestination(digitizationRequestBody);
     this.addProperty(digitizationRequestBody, 'partial_digitization', 'true');
     this.addProperty(digitizationRequestBody, 'chapter_or_article_title', this.apiResultBorrowingRequestLink['title']);
-    this.addProperty(digitizationRequestBody, 'author', this.apiResultBorrowingRequestLink['author']);
-    var requiredPages = Object.create(null);
-    var requiredPageRange = Object.create(null);
-    this.addProperty(requiredPageRange, 'from_page', this.apiResultBorrowingRequestLink['start_page'])
-    this.addProperty(requiredPageRange, 'to_page', this.apiResultBorrowingRequestLink['end_page'])
-    this.addProperty(requiredPages, 'required_pages_range', requiredPageRange);
-    this.addProperty(digitizationRequestBody,'required_pages', requiredPages);
+    this.addProperty(digitizationRequestBody, 'chapter_or_article_author', this.apiResultBorrowingRequestLink['author']);
+    this.setRequiredPages(digitizationRequestBody);
     this.addProperty(digitizationRequestBody, "date_of_publication", this.apiResultBorrowingRequestLink['year']);
     this.addProperty(digitizationRequestBody, "volume", this.apiResultBorrowingRequestLink['volume']);
     this.addProperty(digitizationRequestBody, "issue", this.apiResultBorrowingRequestLink['issue']);
-    this.createCommentWithPublisherAndEditionInfo(digitizationRequestBody);
-
-
-    /*
-        this.addProperty(digitizationRequest, "", this.apiResultBorrowingRequestLink['']);
-        this.addProperty(digitizationRequest, "", this.apiResultBorrowingRequestLink['']);
-    */
-    console.log('digitizationRequest(): ', digitizationRequestBody);
-/*
-    value["jjrequest"] = requestObject;
-
-
-    // value["myname"] = "jegsen1";
-    var myObj = { "name":"John", "age":30, "car":null };
-    var mySecondObject = { "alder": 40, "farve": "sort"}
-    myObj["hest"] = mySecondObject;
-
-    value["myobject"] = myObj;
-*/
+    this.setCommentWithPublisherAndEditionInfo(digitizationRequestBody);
     return digitizationRequestBody;
   }
 
+  private setRequiredPages(digitizationRequestBody) {
+    var requiredPageRangeObject = {
+      from_page: this.apiResultBorrowingRequestLink['start_page'],
+      to_page: this.apiResultBorrowingRequestLink['end_page']
+    };
+    var requiredPageRangeArray = [requiredPageRangeObject];
+    this.addProperty(digitizationRequestBody, "required_pages_range", requiredPageRangeArray);
+  }
 
-  private createCommentWithPublisherAndEditionInfo(digitizationRequest) {
+  private setTargetDestination(digitizationRequestBody) {
+    var targetDestinationObject = Object.create(null);
+    this.addProperty(targetDestinationObject, 'value', 'DIGI_DEPT_INST');
+    this.addProperty(digitizationRequestBody, 'target_destination', targetDestinationObject);
+  }
+
+  private setRequestSubtype(digitizationRequestBody) {
+    var requestSubType = Object.create(null);
+    this.addProperty(requestSubType, 'value', 'PHYSICAL_TO_DIGITIZATION');
+    this.addProperty(digitizationRequestBody, 'request_sub_type', requestSubType);
+  }
+
+  private setLastInterestDate(digitizationRequestBody) {
+    const lastInterestDate = this.apiResultBorrowingRequestLink['last_interest_date'];
+    var date = Object.create(null);
+    var defaultDate: Date = new Date("1 1 2099");
+    date = lastInterestDate == null ? defaultDate : lastInterestDate;
+    this.addProperty(digitizationRequestBody, 'last_interest_date', date);
+  }
+
+  private setCommentWithPublisherAndEditionInfo(digitizationRequest) {
     var comment = this._resultFromGetUserRequestApiCall['comment']==null ? '' : this._resultFromGetUserRequestApiCall['comment'];
     const publisher = this.apiResultBorrowingRequestLink['publisher']==null? '' : this.apiResultBorrowingRequestLink['publisher'];
     const edition = this.apiResultBorrowingRequestLink['edition']==null? '' : this.apiResultBorrowingRequestLink['edition'];
@@ -433,6 +335,68 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
 
   saveItemIdToForm() {
     this.toastr.error(this.formConvertHelper.getMmsId());
-    this.formConvertHelper.updateFormWithItemData(this.tmpItemId, this.formConvertHelper.getMmsId())
+    const findesItemIdPaaForm = this.formConvertHelper.getItemId();
+    console.log('findesItemIdPaaForm(): ', findesItemIdPaaForm);
+    this.formConvertHelper.updateFormWithMmsAndItemId(this.tmpItemId, this.formConvertHelper.getMmsId())
   }
+
+  changeType(){
+    // this.loading = true;
+    this.isChangeable = false;
+    const postBody = { ...this.apiResultBorrowingRequestLink }
+    this.deleteIrrelevantFields(postBody);
+    if(this.citationTypeCode === 'BK'){//bør kunne fjernes, når der er ryddet op.
+      this.changeToArticle(postBody);
+    }
+    var url = this.selectedBorrowingRequestlink.split('/').slice(0, -1).join('/');// /users/88118796/resource-sharing-requests
+    console.log('Gør klar til at sende create med url(): ', url);
+    this.hasApiResult = false;
+    this.sendCreateRequest({ url, requestBody: postBody});
+    // wait for post
+    (async () => {
+      while (!this.hasApiResult) { // The loop is not for waiting for post request to end.
+        await this.delay(1000);
+      }
+      /*
+                if (this.apiResult && Object.keys(this.apiResult).length > 0) {//no error
+                  //delete the old request
+                  this.sendDeleteRequest(this.selectedBorrowingRequestlink + '?remove_request=true');
+                }else{
+                  this.loading = false;
+                }
+      */
+    })();
+  }
+
+  deleteIrrelevantFields(value: JSON) {
+    delete value['request_id'];
+    delete value['external_id'];
+    delete value['created_date'];
+    delete value['last_modified_date'];
+    delete value['created_time'];
+    delete value['last_modified_time'];
+    delete value['user_request'];
+  }
+
+  changeToArticle(value: any) {
+    value['citation_type']['value'] = 'CR';
+    value['chapter_title'] = "";
+    if( value['chapter_author']){
+      value['author'] = value['chapter_author'];
+    }
+    value['issn'] = value['isbn'];
+    value['isbn'] = "";
+
+    //volume & issue split
+    if( value['volume'].includes(",")){
+      var volume: string[] = value['volume'].split(",");
+      value['issue'] = volume.length > 1 ? (volume.slice(-1)+'').trim() : "" ;
+      value['volume'] = volume.length > 1 ? volume.slice(0, -1).join(',') : volume+'';
+    }
+    if( value['part']){
+      value['volume'] = value['volume']  + " " + value['part'];
+    }
+  }
+
+
 }

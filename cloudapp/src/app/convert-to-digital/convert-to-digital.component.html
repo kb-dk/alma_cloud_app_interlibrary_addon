@@ -1,8 +1,6 @@
 <app-topmenu></app-topmenu>
 
 <mat-icon class="info-icon" (click)="toggleShowExample()" color="primary">info</mat-icon><br>
-<span>ItemId: {{tmpItemId}}</span><br>
-<button mat-raised-button color="secondary" (click)="saveItemIdToForm()" [disabled]="!tmpItemId===''">Use this Item</button>
 
 <div *ngIf="showExample">
     <mat-divider></mat-divider><br>
@@ -26,20 +24,10 @@
     <h4 [innerHTML]='infoText'></h4>
 </div>
 
-<div class="align-center">
-    <span>selectedBorrowingRequestlink: </span>
-    <h4 [innerHTML]='selectedBorrowingRequestlink'></h4>
-</div>
-
-<div class="align-center">
-    <span>selectedUserRequestlink: </span>
-    <h4 [innerHTML]='selectedUserRequestlink' ></h4>
-</div>
 
 <div class="loading-shade" *ngIf="loading">
     <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
 </div>
-
     <div class="form-container" *ngIf="showBorrowingRequestSelectbox || isChangeable">
         <form [formGroup]='formConvertHelper.getForm()' (submit)="submit()">
             <div *ngIf="showBorrowingRequestSelectbox else showSelectedItemTitle">
@@ -73,10 +61,6 @@
                     <input matInput formControlName="mmsId" type="text" [required]="true">
                 </mat-form-field>
                 <mat-form-field class="form-field" appearance="outline">
-                    <mat-label>Record Id</mat-label>
-                    <input matInput formControlName="recordId" type="text" [required]="">
-                </mat-form-field>
-                <mat-form-field class="form-field" appearance="outline">
                     <mat-label>Item Id</mat-label>
                     <input matInput formControlName="itemId" type="text" [required]="" >
                 </mat-form-field>
@@ -89,22 +73,17 @@
             -->
             <button mat-raised-button color="primary" type="submit" [disabled]="!isChangeable">Convert to digitization request</button>
             <button mat-raised-button color="secondary" (click)="resetForm()">Change Type (ORIGINAL)</button>
+            <br><span>ItemType: {{showItemType}}</span><br>
+            <br><span>Number of Items: {{showNumberOfItem}}</span><br>
         </form>
+        <div *ngIf="itemIdFoundOnAlmaPage">
+            <br>
+            <span >ItemId: {{tmpItemId}}</span><br>
+            <button mat-raised-button color="secondary" (click)="saveItemIdToForm()" [disabled]="!tmpItemId===''">Use this Item</button>
+            <br>
+        </div>
         <br>
         <textarea>{{toTextArea}}</textarea>
-        <div *ngIf="showBibSelectbox ">
-            <mat-form-field appearance="outline">
-                <mat-label>BIB et eller andet</mat-label>
-                <mat-select (selectionChange)="findBibData($event.value)" >
-                    <mat-option [value]="0">None</mat-option>
-                    <mat-option *ngFor="let entity of pageEntities" [value]="entity">
-                        {{entity.description| truncate : 50}} - {{entity.id}}
-                    </mat-option>
-                </mat-select>
-            </mat-form-field>
-        </div>
-
-        <!--        <button (click)="resetForm()">Test</button>  TODO: select-box nulstilles ikke -->
     </div>
 
 
