@@ -2,7 +2,7 @@ import {CUSTOM_ELEMENTS_SCHEMA, NgModule} from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
 import { BrowserModule, Title } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { MaterialModule, getTranslateModule } from '@exlibris/exl-cloudapp-angular-lib';
+import { MaterialModule, getTranslateModule, AlertModule } from '@exlibris/exl-cloudapp-angular-lib';
 import { ToastrModule } from 'ngx-toastr';
 
 import { AppComponent } from './app.component';
@@ -16,8 +16,11 @@ import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { ExternalLocalizationService } from "./external-localization/external-localization.service";
 import { SettingsDialogComponent } from './settings/settings-dialog/settings-dialog.component';
 import { MultiSelectComponent } from './multi-select/multi-select.component';
-import {SelectEntitiesComponent} from "./multi-select/select-entities/select-entities.component";
+import { SelectEntitiesComponent} from "./multi-select/select-entities/select-entities.component";
 import { ConvertToDigitalComponent } from './convert-to-digital/convert-to-digital.component';
+import { AlertService } from '@exlibris/exl-cloudapp-angular-lib';
+import { ConfigurationComponent } from './configuration/configuration.component';
+
 
 export function getToastrModule() {
   return ToastrModule.forRoot({
@@ -38,6 +41,7 @@ export function getToastrModule() {
     MultiSelectComponent,
     SelectEntitiesComponent,
     ConvertToDigitalComponent,
+    ConfigurationComponent,
   ],
   entryComponents: [
     SettingsDialogComponent,
@@ -52,6 +56,7 @@ export function getToastrModule() {
     ReactiveFormsModule,
     getTranslateModule(),
     getToastrModule(),
+    AlertModule,
   ],
   providers: [
     Title,

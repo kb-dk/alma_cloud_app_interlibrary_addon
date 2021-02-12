@@ -7,10 +7,10 @@
     <span>A swift way of converting a borrowing request, with a matching local ressource to digitization request</span><br>
     <span>...you need to:</span><br><br>
     <span>1. Navigate to "Borrowing Requets" page in Alma.</span><br>
-    <span>2. Select the Borrowing Request in the cloud app.</span><br>
-    <span>3. Click "View local Ressource" for the item.</span><br>
-    <span>4. Select the appropriate resource in the cloud app.</span><br>
-    <span>5. Click "Convert to digitization Request" in the cloud app.</span><br><br>
+    <span>2. Select the Borrowing Request in the cloud app selectbox below.</span><br>
+    <span>3. Find an appropriate item to digitize. By the time a sigle item is selected (view- or edit-mode), the "Convert to digitization Request"-button will appear.</span><br>
+    <span>4. Click "Convert to digitization Request".</span><br>
+    <span>5. Please notice any alertmessages in the cloudApp indicating that an error has orcurred.</span><br><br>
     <mat-divider></mat-divider><br>
 </div>
 
@@ -21,19 +21,19 @@
 </div>
 
 <div class="align-center">
-    <h4 [innerHTML]='infoText'></h4>
+    <h4 [innerHTML]='userGuideText'></h4>
 </div>
 
 
 <div class="loading-shade" *ngIf="loading">
-    <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
+    <mat-progress-spinner mode="indeterminate" diameter="30"></mat-progress-spinner>
 </div>
-    <div class="form-container" *ngIf="showBorrowingRequestSelectbox || isChangeable">
-        <form [formGroup]='formConvertHelper.getForm()' (submit)="submit()">
-            <div *ngIf="showBorrowingRequestSelectbox else showSelectedItemTitle">
+    <div class="form-container" *ngIf="showBorrowingRequestSelectbox || borrowingRequestIsChangeable">
+        <form [formGroup]='formGroupConvertHelper.getForm()' (submit)="submit()">
+            <div *ngIf="showBorrowingRequestSelectbox else showSelectedTitle">
                 <mat-form-field appearance="outline">
                     <mat-label>Borrowing request</mat-label>
-                    <mat-select (selectionChange)="findBorrowingRequestData($event.value)" >
+                    <mat-select (selectionChange)="borrowingRequestSelectedByUser($event.value)" >
                         <mat-option [value]="0">None</mat-option>
                         <mat-option *ngFor="let entity of pageEntities" [value]="entity">
                             {{entity.description| truncate : 50}} - {{entity.id}}
@@ -41,49 +41,35 @@
                     </mat-select>
                 </mat-form-field>
             </div>
-            <ng-template #showSelectedItemTitle>
-                <span class="selectedTitle" [innerHTML]="selectedItemTitle"></span>
+            <ng-template #showSelectedTitle>
+                <span class="selectedTitle" [innerHTML]="selectedTitle"></span>
             </ng-template>
-
-<!--            <mat-form-field class="invisible" appearance="outline">-->
-            <mat-form-field class="" appearance="outline">
-                <mat-label>User Id</mat-label>
-                <input matInput formControlName="userId" type="text" [required]="true">
-            </mat-form-field>
-<!--            <mat-form-field class="invisible" appearance="outline">-->
-            <mat-form-field class="" appearance="outline">
-                <mat-label>Request Id</mat-label>
-                <input matInput formControlName="requestId" type="text" [required]="true">
-            </mat-form-field>
-            <div [hidden]="formConvertHelper.isRequestSelected()">
+            <div [hidden]="true">
+                <mat-form-field class="" appearance="outline">
+                    <mat-label>User Id</mat-label>
+                    <input matInput formControlName="userId" type="text" [required]="true">
+                </mat-form-field>
+                <mat-form-field class="" appearance="outline">
+                    <mat-label>Request Id</mat-label>
+                    <input matInput formControlName="requestId" type="text" [required]="true">
+                </mat-form-field>
+            </div>
+            <div [hidden]="true">
                 <mat-form-field class="form-field" appearance="outline">
                     <mat-label>MMS ID</mat-label>
                     <input matInput formControlName="mmsId" type="text" [required]="true">
                 </mat-form-field>
+            </div>
+            <div [hidden]="true">
                 <mat-form-field class="form-field" appearance="outline">
                     <mat-label>Item Id</mat-label>
                     <input matInput formControlName="itemId" type="text" [required]="" >
                 </mat-form-field>
             </div>
-
-            <!--
-                            <mat-error *ngIf="loginForm.controls.password.touched && loginForm.controls.password.invalid">
-                                <span *ngIf="loginForm.controls.password.errors.required">This field is mandatory.</span>
-                            </mat-error>
-            -->
-            <button mat-raised-button color="primary" type="submit" [disabled]="!isChangeable">Convert to digitization request</button>
-            <button mat-raised-button color="secondary" (click)="resetForm()">Change Type (ORIGINAL)</button>
-            <br><span>ItemType: {{showItemType}}</span><br>
-            <br><span>Number of Items: {{showNumberOfItem}}</span><br>
+            <button mat-raised-button color="primary" type="submit" [disabled]="!readyToChangeRequestType">Convert to digitization request</button>
+            <a mat-raised-button color="secondary" (click)="resetForm()">Reset</a>
         </form>
-        <div *ngIf="itemIdFoundOnAlmaPage">
-            <br>
-            <span >ItemId: {{tmpItemId}}</span><br>
-            <button mat-raised-button color="secondary" (click)="saveItemIdToForm()" [disabled]="!tmpItemId===''">Use this Item</button>
-            <br>
-        </div>
-        <br>
-        <textarea>{{toTextArea}}</textarea>
+        <textarea [hidden]="false">{{toTextArea}}</textarea> <!-- Usefull for testing-->
     </div>
 
 

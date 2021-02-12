@@ -26,7 +26,6 @@ export class FormGroupConvertHelper implements FormGroupConvertHelperInterface{
             requestId: [{value: this.clean(requestId), disabled: true}],
             mmsId: '',
             itemId: '',
-            // itemId: [{value: '', disabled: true}],
             isRequestOk: true,
             isMmsAndItemOk: false,
         });
@@ -34,19 +33,34 @@ export class FormGroupConvertHelper implements FormGroupConvertHelperInterface{
         console.log('updateFormWithRequestData: ', userId + '  ' + requestId);
     }
 
-    public updateFormWithMmsAndItemId (itemId: string, mmsId: string) {
+    public updateFormWithMmsId (mmsId: string) {
         console.log('this._form.get(mmsId): ', this._form.get('mmsId'));
         let formBuilder: FormBuilder = new FormBuilder();
         const formGroup = formBuilder.group({
             userId: [{value: this._form.get('userId').value, disabled: true}],
             requestId: [{value: this._form.get('requestId').value, disabled: true}],
-            mmsId: [{value: this.clean(mmsId), disabled: true}],
+            mmsId: [{value: this.clean(mmsId), disabled: false}],
+            itemId: [{value: '', disabled: true}],
+            isRequestOk: true,
+            isMmsAndItemOk: false,
+        });
+        this.setForm(formGroup);
+        console.log('update form with mmsId: ' + mmsId);
+    }
+
+    public updateFormWithItemId (itemId: string) {
+        console.log('this._form.get(itemId): ', this._form.get('itemId'));
+        let formBuilder: FormBuilder = new FormBuilder();
+        const formGroup = formBuilder.group({
+            userId: [{value: this._form.get('userId').value, disabled: true}],
+            requestId: [{value: this._form.get('requestId').value, disabled: true}],
+            mmsId: [{value: this._form.get('mmsId').value, disabled: true}],
             itemId: [{value: this.clean(itemId), disabled: true}],
             isRequestOk: true,
             isMmsAndItemOk: true,
         });
         this.setForm(formGroup);
-        console.log('update form with mmsId: ' + mmsId + ' and itemId: ' + itemId);
+        console.log('update form with itemId: ' + itemId);
     }
 
     public getForm(): FormGroup { return this._form;}
@@ -55,7 +69,7 @@ export class FormGroupConvertHelper implements FormGroupConvertHelperInterface{
         return !this._form.get('isRequestOk').value;
     }
     public isMmsAndItemIdOK(): boolean{
-        return !this._form.get('isMmsAndItemOk').value;
+        return this._form.get('isMmsAndItemOk').value;
     }
 
     private clean(stringToBeCleaned: string) {
