@@ -49,6 +49,13 @@ export class FormGroupConvertHelper implements FormGroupConvertHelperInterface{
     }
 
     public updateFormWithItemId (itemId: string) {
+        console.log('itemId(): ', itemId);
+        const newItemIdOk:boolean = itemId.trim()==''?false : true;
+        console.log('newItemIdOk(): ', newItemIdOk);
+        const presentMmsIdOk: boolean = this._form.get('mmsId').value.trim()==''?false : true;
+        console.log('presentMmsIdOk(): ', presentMmsIdOk);
+        const mmsAndItemOk = newItemIdOk && presentMmsIdOk;
+        console.log('mmsAndItemOk(): ', mmsAndItemOk);
         console.log('this._form.get(itemId): ', this._form.get('itemId'));
         let formBuilder: FormBuilder = new FormBuilder();
         const formGroup = formBuilder.group({

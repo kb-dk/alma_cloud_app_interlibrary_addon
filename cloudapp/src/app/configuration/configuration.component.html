@@ -1,1 +1,31 @@
-<p>configuration works!</p>
+<app-topmenu>
+</app-topmenu>
+
+<h3 class="subheading-1">Create new setting:</h3>
+<mat-form-field appearance="outline">
+    <mat-label>(Part of) Location-name</mat-label>
+    <input matInput [(ngModel)]="newLocation"  [maxLength]="50">
+</mat-form-field>
+<div mat-dialog-actions>
+    <button mat-raised-button color="primary" (click)="saveNewLocation()">Save Location</button>
+</div><br>
+
+
+<h3 class="subheading-1">Valid digitization localizations settings:</h3>
+<div *ngIf="settings && settings.locationsUsableForDitization.length>0 else noDigitizationLocations">
+    <mat-list *ngFor="let location of settings.locationsUsableForDitization">
+        <mat-list-item>
+            <span>{{location}}</span>
+            <!--  TODO: JJEG ExLibris Way(https://developers.exlibrisgroup.com/cloudapps/docs/style/#colors) - dosn't work.
+                    <i class="uxf-icon uxf-close eca-button" (click)="remove(item)">delete</i>
+            -->
+            <mat-icon matListIcon (click)="remove(location)">delete</mat-icon>
+        </mat-list-item>
+    </mat-list>
+</div>
+
+<ng-template #noDigitizationLocations>
+    <div id="emptyList">
+        <p>There are no locations for digitization! Type the new location in the input field and click the 'Save Location'-button.</p>
+    </div>
+</ng-template>

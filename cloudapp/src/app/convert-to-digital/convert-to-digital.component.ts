@@ -4,7 +4,7 @@ import {
   Alert,
   AlertService,
   CloudAppEventsService,
-  CloudAppRestService,
+  CloudAppRestService, CloudAppSettingsService,
   Entity,
   EntityType,
   HttpMethod,
@@ -19,6 +19,7 @@ import {ToastrService} from "ngx-toastr";
 import * as url from "url";
 import {formatCurrency} from "@angular/common";
 import {DigitizationRequestCreater} from "./digitizationRequestCreater";
+import {Settings} from "../models/settings";
 
 @Component({
   selector: 'app-convert-to-digital',
@@ -48,12 +49,15 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
   formGroupConvertHelper: FormGroupConvertHelper;
   digitizationRequestCreater: DigitizationRequestCreater;
   toTextArea:any = ''; //for debugging - remove hidden from html-component
-  readyToChangeRequestType = false;
-  alertMessage: string = '';
+  readyToChangeRequestType : boolean = false;
+  private locationsUsableForDitization: [string];
+  private itemLocationIsValid: boolean = false;
+  private locationOfSelectedItem: string = '';
 
   constructor(private appService: AppService,
               private restService: CloudAppRestService,
               private eventsService: CloudAppEventsService,
+              private settingsService: CloudAppSettingsService,
               private toastr: ToastrService,
               private alert: AlertService,
               private formBuilder: FormBuilder)
@@ -67,9 +71,15 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
   }
 
   private updateReadyToChange() {
-    this.readyToChangeRequestType = this.borrowingRequestIsChangeable && this.formGroupConvertHelper.isMmsAndItemIdOK();
+    this.readyToChangeRequestType = this.borrowingRequestIsChangeable && this.itemLocationIsValid && this.formGroupConvertHelper.isMmsAndItemIdOK();
+    console.log('this.borrowingRequestIsChangeable: ', this.borrowingRequestIsChangeable);
+    console.log('this.itemLocationIsValid: ', this.itemLocationIsValid);
+    console.log('this.formGroupConvertHelper.isMmsAndItemIdOK(): ', this.formGroupConvertHelper.isMmsAndItemIdOK());
+    console.log('this.readyToChangeRequestType(): ', this.readyToChangeRequestType);
     if(this.readyToChangeRequestType) {
       this.createAlertMessage('Use this item? Press "Convert to digitization request"', 'info');
+    } else if (this.formGroupConvertHelper.isMmsAndItemIdOK()) {
+      this.createAlertMessage('Location of the selected item (' + this.locationOfSelectedItem + ') is not valid for digitization requests', 'error');
     }
   }
 
@@ -97,6 +107,8 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
 
   onPageLoad = (pageInfo: PageInfo) => {
     this.pageEntities = pageInfo.entities;
+    this.getLocationsUsableForDitization();
+    console.log('this.locationsUsableForDitization: ', this.locationsUsableForDitization);
     if(!this.borrowingRequestSelected){
       this.initPage();
     }
@@ -110,6 +122,17 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
           this.handleItemTypeEntities();
       }
     }
+  }
+
+  private getLocationsUsableForDitization() {
+    this.settingsService.get().subscribe(result => {
+      console.log('result(get Settings): ', result);
+      if (!result.locationsUsableForDitization) {
+        this.createAlertMessage('Converting requests cannot be done since there are no valid locations configured for digitization. Please contact your Alma system manager!', 'error');
+      } else {
+        this.locationsUsableForDitization = result.locationsUsableForDitization;
+      }
+    })
   }
 
   private createAlertMessage(message:string, alertTypeAsString:string) {
@@ -130,16 +153,19 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
   private handleItemTypeEntities() {
     const onlyOneEntityOnPage = this.pageEntities.length == 1;
     if(onlyOneEntityOnPage){
-    this.findItemData(this.pageEntities[0]);
- /*
-      this.addToDebuggingTextArea(JSON.stringify(this.pageEntities[0]));
-      const tmpItemId = this.pageEntities[0].id;
-      var link = this.pageEntities[0].link;
+      const onlyEntityOnAlmaPage = this.pageEntities[0];
+      this.addToDebuggingTextArea(JSON.stringify(onlyEntityOnAlmaPage));
+      const tmpItemId = onlyEntityOnAlmaPage.id;
+      var link = onlyEntityOnAlmaPage.link;
       var mmsId = link.split("/")[2];
       this.formGroupConvertHelper.updateFormWithMmsId(mmsId);
       this.formGroupConvertHelper.updateFormWithItemId(tmpItemId);
+      this.findAndValidateItemData(onlyEntityOnAlmaPage);
+    } else {//TODO: mekanikken bag er klar til at bliver simplificeret.
+      this.itemLocationIsValid = false;
+      this.formGroupConvertHelper.updateFormWithItemId('');
       this.updateReadyToChange();
-*/
+      this.alert.clear();//In this case we override showing alert-message.
     }
   }
 
@@ -166,6 +192,8 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
     this.borrowingRequestIsChangeable = false;
     this.showBorrowingRequestSelectbox = false;
     this.borrowingRequestSelected = false;
+    this.itemLocationIsValid = false;
+    this.locationOfSelectedItem = ''
     this.updateReadyToChange();
   }
 
@@ -194,14 +222,17 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
     });
   }
 
-  findItemData(entity : Entity){
+  findAndValidateItemData(entity : Entity){
     var loggerText = 'ItemRequestLink: ' + entity.link.toString();
     this.addToDebuggingTextArea(loggerText);
     this.restService.call(entity.link).subscribe(result => {
       loggerText = 'Result from ItemRequest: /n ' + JSON.stringify(result);
       this.addToDebuggingTextArea(loggerText);
-      const locationValue = result['item_data']['location']['value'];
-      this.addToDebuggingTextArea('LocationValue: ' + locationValue);
+      this.locationOfSelectedItem = result['item_data']['location']['value'];
+      this.addToDebuggingTextArea('LocationValue: ' + this.locationOfSelectedItem);
+      this.itemLocationIsValid = this.locationsUsableForDitization.filter(locationName => locationName === this.locationOfSelectedItem).length == 1;
+      this.updateReadyToChange();
+      console.log('this.readyToChangeRequestType: ', this.readyToChangeRequestType);
     });
   }
 
@@ -217,7 +248,6 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
     let requestId: string = JSON.stringify(result['request_id']);
     this.formGroupConvertHelper.updateFormWithRequestData(userId, requestId);
   }
-
 
   private sendCreateRequest({ url, requestBody }: { url: string; requestBody: any; }) {
     const loggerText = 'DIGITIZATION' + '\n' + url + '\n' + JSON.stringify(requestBody);

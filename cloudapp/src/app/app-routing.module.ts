@@ -5,6 +5,7 @@ import { ExternalLocalizationComponent } from "./external-localization/external-
 import { SettingsComponent } from "./settings/settings.component";
 import {MultiSelectComponent} from "./multi-select/multi-select.component";
 import {ConvertToDigitalComponent} from "./convert-to-digital/convert-to-digital.component";
+import {ConfigurationComponent} from "./configuration/configuration.component";
 
 const routes: Routes = [
   { path: '', component: MainComponent },
@@ -12,6 +13,7 @@ const routes: Routes = [
   { path: 'convert-to-digital', component: ConvertToDigitalComponent },
   { path: 'multi-select', component: MultiSelectComponent },
   { path: 'settings', component: SettingsComponent },
+  { path: 'config', component: ConfigurationComponent },
 ];
 
 @NgModule({
