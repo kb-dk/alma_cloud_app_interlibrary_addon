@@ -18,6 +18,7 @@ export class ConfigurationComponent implements OnInit {
   // dialogOpen: boolean = false;
   newLocation: string;
   private savedOk: boolean = false;
+  private showExample: boolean = false;
 
   constructor(
       private appService: AppService,
@@ -66,7 +67,7 @@ export class ConfigurationComponent implements OnInit {
   }
 
   remove(removableLocation: String) {
-    this.settings.locationsUsableForDitization = this.settings.locationsUsableForDitization.filter(locationName => locationName != removableLocation);
+    this.settings.locationsUsableForDitization = this.settings.locationsUsableForDitization.filter(locationCode => locationCode != removableLocation);
     this.saveLocations(false);
   }
 
@@ -92,6 +93,9 @@ export class ConfigurationComponent implements OnInit {
     return new Promise( resolve => setTimeout(resolve, ms) );
   }
 
+  toggleShowExample() {
+    this.showExample = !this.showExample;
+  }
 }
 
 

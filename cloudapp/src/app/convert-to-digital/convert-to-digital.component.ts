@@ -52,7 +52,7 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
   readyToChangeRequestType : boolean = false;
   private locationsUsableForDitization: [string];
   private itemLocationIsValid: boolean = false;
-  private locationOfSelectedItem: string = '';
+  private locationCodeOfSelectedItem: string = '';
 
   constructor(private appService: AppService,
               private restService: CloudAppRestService,
@@ -77,9 +77,9 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
     console.log('this.formGroupConvertHelper.isMmsAndItemIdOK(): ', this.formGroupConvertHelper.isMmsAndItemIdOK());
     console.log('this.readyToChangeRequestType(): ', this.readyToChangeRequestType);
     if(this.readyToChangeRequestType) {
-      this.createAlertMessage('Use this item? Press "Convert to digitization request"', 'info');
+      this.createAlertMessage('Use this item from location (' + this.locationCodeOfSelectedItem +')? Press "Convert to digitization request".', 'info');
     } else if (this.formGroupConvertHelper.isMmsAndItemIdOK()) {
-      this.createAlertMessage('Location of the selected item (' + this.locationOfSelectedItem + ') is not valid for digitization requests', 'error');
+      this.createAlertMessage('Location of the selected item (' + this.locationCodeOfSelectedItem + ') is not valid for digitization requests. The location can be added by the General Administrator.', 'error');
     }
   }
 
@@ -153,20 +153,28 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
   private handleItemTypeEntities() {
     const onlyOneEntityOnPage = this.pageEntities.length == 1;
     if(onlyOneEntityOnPage){
-      const onlyEntityOnAlmaPage = this.pageEntities[0];
-      this.addToDebuggingTextArea(JSON.stringify(onlyEntityOnAlmaPage));
-      const tmpItemId = onlyEntityOnAlmaPage.id;
-      var link = onlyEntityOnAlmaPage.link;
-      var mmsId = link.split("/")[2];
-      this.formGroupConvertHelper.updateFormWithMmsId(mmsId);
-      this.formGroupConvertHelper.updateFormWithItemId(tmpItemId);
-      this.findAndValidateItemData(onlyEntityOnAlmaPage);
+      this.prepareReadySettingsIfOk();
     } else {//TODO: mekanikken bag er klar til at bliver simplificeret.
-      this.itemLocationIsValid = false;
-      this.formGroupConvertHelper.updateFormWithItemId('');
-      this.updateReadyToChange();
-      this.alert.clear();//In this case we override showing alert-message.
+      this.removeUpdateReadySettings();
     }
+  }
+
+  private prepareReadySettingsIfOk() {
+    const onlyEntityOnAlmaPage = this.pageEntities[0];
+    this.addToDebuggingTextArea(JSON.stringify(onlyEntityOnAlmaPage));
+    const tmpItemId = onlyEntityOnAlmaPage.id;
+    var link = onlyEntityOnAlmaPage.link;
+    var mmsId = link.split("/")[2];
+    this.formGroupConvertHelper.updateFormWithMmsId(mmsId);
+    this.formGroupConvertHelper.updateFormWithItemId(tmpItemId);
+    this.findAndValidateItemData(onlyEntityOnAlmaPage);
+  }
+
+  private removeUpdateReadySettings() {
+    this.itemLocationIsValid = false;
+    this.formGroupConvertHelper.updateFormWithItemId('');
+    this.updateReadyToChange();
+    this.alert.clear();//In this case we override showing alert-message.
   }
 
   private handleBorrowingRequestTypeEntities(numberOfEntities: number, pageInfo: PageInfo) {
@@ -193,7 +201,7 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
     this.showBorrowingRequestSelectbox = false;
     this.borrowingRequestSelected = false;
     this.itemLocationIsValid = false;
-    this.locationOfSelectedItem = ''
+    this.locationCodeOfSelectedItem = ''
     this.updateReadyToChange();
   }
 
@@ -228,9 +236,13 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
     this.restService.call(entity.link).subscribe(result => {
       loggerText = 'Result from ItemRequest: /n ' + JSON.stringify(result);
       this.addToDebuggingTextArea(loggerText);
-      this.locationOfSelectedItem = result['item_data']['location']['value'];
-      this.addToDebuggingTextArea('LocationValue: ' + this.locationOfSelectedItem);
-      this.itemLocationIsValid = this.locationsUsableForDitization.filter(locationName => locationName === this.locationOfSelectedItem).length == 1;
+      this.locationCodeOfSelectedItem = result['item_data']['location']['value'];
+      this.addToDebuggingTextArea('LocationCode: ' + this.locationCodeOfSelectedItem);
+      if(this.locationsUsableForDitization.length == 1 && this.locationsUsableForDitization[0].includes('*')){
+        this.itemLocationIsValid = true;
+      } else {
+        this.itemLocationIsValid = this.locationsUsableForDitization.filter(locationCode => this.locationCodeOfSelectedItem.includes(locationCode)).length > 0;
+      }
       this.updateReadyToChange();
       console.log('this.readyToChangeRequestType: ', this.readyToChangeRequestType);
     });
