@@ -5,10 +5,10 @@
 
 <div *ngIf="showExample">
     <mat-divider></mat-divider><br>
-    <span>This is the configuration page for "Convert Borrowing Request to Digitization"-part of this cloudApp.</span><br>
+    <span>This is the configuration page for "Convert Borrowing Request to Digitization"-part of this Cloud App.</span><br>
     <span>The idea is, that you as administrator has to enter all valid location codes here one by one.</span><br><br>
     <span>Location codes are removed by clicking at the corresponding garbage can.</span><br><br>
-    <span>NB!: If all location codes in your library are valid for digitization, you create one single code named '<b>*</b>' (only the star).</span><br>
+    <span>NB!: If all location codes in your library are valid for digitization, you create only one code named '<b>*</b>' (just the star).</span><br>
     <mat-divider></mat-divider><br>
 </div>
 
@@ -23,11 +23,11 @@
 
 
 <h3 class="subheading-1">Valid localization codes for digitization are:</h3>
-<div *ngIf="settings && settings.locationsUsableForDitization.length>0 else noDigitizationLocations">
-    <mat-list *ngFor="let location of settings.locationsUsableForDitization">
+<div *ngIf="configuration && configuration.locationsUsableForDigitization.length>0 else noDigitizationLocations">
+    <mat-list *ngFor="let location of configuration.locationsUsableForDigitization">
         <mat-list-item>
 
-            <span>{{location}}</span><span *ngIf="location==='*'&&settings.locationsUsableForDitization.length==1"> (All locations are valid!)</span>
+            <span>{{location}}</span><span *ngIf="location==='*'&&configuration.locationsUsableForDigitization.length==1"> (All locations are valid!)</span>
             <!--  TODO: JJEG ExLibris Way(https://developers.exlibrisgroup.com/cloudapps/docs/style/#colors) - dosn't work.
                     <i class="uxf-icon uxf-close eca-button" (click)="remove(item)">delete</i>
             -->

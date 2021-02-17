@@ -1,10 +1,8 @@
-import { Component, OnInit } from '@angular/core';
-import {ExternalLinkTemplate} from "../models/external-link-template";
-import {Settings} from "../models/settings";
+import {Component, OnInit} from '@angular/core';
 import {AppService} from "../app.service";
-import {CloudAppSettingsService} from "@exlibris/exl-cloudapp-angular-lib";
+import {CloudAppConfigService} from "@exlibris/exl-cloudapp-angular-lib";
 import {ToastrService} from "ngx-toastr";
-import {MatDialog} from "@angular/material/dialog";
+import {Configuration} from "../models/configuration";
 
 @Component({
   selector: 'app-configuration',
@@ -12,44 +10,39 @@ import {MatDialog} from "@angular/material/dialog";
   styleUrls: ['./configuration.component.scss']
 })
 export class ConfigurationComponent implements OnInit {
-  locationsUsableForDitization: string[] = [];
-  settings: Settings;
+  configuration: Configuration;
   saving = false;
-  // dialogOpen: boolean = false;
   newLocation: string;
   private savedOk: boolean = false;
   private showExample: boolean = false;
 
   constructor(
       private appService: AppService,
-      private settingsService: CloudAppSettingsService,
+      private cloudAppConfigService: CloudAppConfigService,
       private toastr: ToastrService,
       // public dialog: MatDialog
   ) { }
 
   ngOnInit(): void {
     this.appService.setTitle('Configuraton');
-    this.getSettings();
+    this.getConfiguration();
   }
 
-  private getSettings() {
-    this.settingsService.get().subscribe(result => {
-      console.log('result(get Settings): ', result);
-      if (!result.externalLinkTemplates && !result.locationsUsableForDitization) {
-        console.log('1');
-        result = new Settings();
+  private getConfiguration() {
+    this.cloudAppConfigService.get().subscribe(result => {
+      console.log('result(get Configuratrion): ', result);
+      if (!result.locationsUsableForDigitization) {
+        console.log('!result.locationsUsableForDigitization. New Configuration is created. Result was:', result);
+        result = new Configuration();
       }
-      if (!result.locationsUsableForDitization) {
-        console.log('2');
-        result.locationsUsableForDitization = [];
-      }
-      this.settings = result;
+      this.configuration = result;
+      console.log('this.configuration(): ', this.configuration);
     })
   }
 
   private saveLocations(createNew: boolean) {
     this.saving = true;
-    this.settingsService.set(this.settings).subscribe(
+    this.cloudAppConfigService.set(this.configuration).subscribe(
         response => {
           this.savedOk = true;
           if(!createNew) {
@@ -67,13 +60,13 @@ export class ConfigurationComponent implements OnInit {
   }
 
   remove(removableLocation: String) {
-    this.settings.locationsUsableForDitization = this.settings.locationsUsableForDitization.filter(locationCode => locationCode != removableLocation);
+    this.configuration.locationsUsableForDigitization = this.configuration.locationsUsableForDigitization.filter(locationCode => locationCode != removableLocation);
     this.saveLocations(false);
   }
 
   saveNewLocation() {
     if (this.newLocation != '') {
-      this.settings.locationsUsableForDitization.push(this.newLocation);
+      this.configuration.locationsUsableForDigitization.push(this.newLocation);
       this.saveLocations(true);
     }
     (async () => {
@@ -81,7 +74,7 @@ export class ConfigurationComponent implements OnInit {
         await this.delay(1000);
       }
       if (this.savedOk) {//no error
-        this.toastr.success('Localization including text: ' + this.newLocation + ' is now valid for digitization.');
+        this.toastr.success('Localization code: ' + this.newLocation + ' is now valid for digitization.');
         this.newLocation = '';
       } else {
         this.toastr.error('Failed updating configuration');

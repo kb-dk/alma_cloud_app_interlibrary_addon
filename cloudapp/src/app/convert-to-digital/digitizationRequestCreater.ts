@@ -1,24 +1,24 @@
-import {FormGroupConvertHelper} from "./formGroupConvertHelper";
+import {DigitizationFields} from "./digitizationFields";
 
 export class DigitizationRequestCreater {
     constructor() {};
 
-    public createUrl(formGroupConvertHelper:FormGroupConvertHelper) {
-        var paramString = "?user_id_type=all_unique&mms_id=" + formGroupConvertHelper.getMmsId() + "&item_pid=" + formGroupConvertHelper.getItemId();
-        console.log('paramString(): ', paramString);
-        const url: any = '/almaws/v1/users/' + formGroupConvertHelper.getUserId() + '/requests' + paramString;
+    public createUrl(digitizationFields:DigitizationFields) {
+        var paramString = "?user_id_type=all_unique&mms_id=" + digitizationFields.getMmsId() + "&item_pid=" + digitizationFields.getItemId();
+        const url: any = '/almaws/v1/users/' + digitizationFields.getUserId() + '/requests' + paramString;
+        console.log('url(createUrl): ', url);
         return url;
     }
 
 
-    public createDigitizationRequestBody(formGroupConvertHelper:FormGroupConvertHelper, resultFromBorrowingRequestApi:any, resultFromUserRequestApi:any) {
+    public createDigitizationRequestBody(digitizationFields:DigitizationFields, resultFromBorrowingRequestApi:any, resultFromUserRequestApi:any) {
         var digitizationRequestBody = Object.create(null);
         this.addProperty(digitizationRequestBody, "user_primary_id", resultFromBorrowingRequestApi['requester']['value']);
         this.setLastInterestDate(digitizationRequestBody, resultFromBorrowingRequestApi);
         this.addProperty(digitizationRequestBody,"request_type","DIGITIZATION");
         this.setRequestSubtype(digitizationRequestBody);
-        this.addProperty(digitizationRequestBody, 'mms_id', formGroupConvertHelper.getMmsId()); //from submittet form
-        this.addProperty(digitizationRequestBody, 'item_id',formGroupConvertHelper.getItemId()); //from submittet form
+        this.addProperty(digitizationRequestBody, 'mms_id', digitizationFields.getMmsId());
+        this.addProperty(digitizationRequestBody, 'item_id',digitizationFields.getItemId());
         this.setTargetDestination(digitizationRequestBody);
         this.addProperty(digitizationRequestBody, 'partial_digitization', 'true');
         this.addProperty(digitizationRequestBody, 'chapter_or_article_title', resultFromBorrowingRequestApi['title']);
@@ -71,7 +71,6 @@ export class DigitizationRequestCreater {
     }
 
     private setCommentWithExtraInfo(digitizationRequest, resultFromBorrowingRequestApi, resultFromUserRequestApi) {
-        console.log('resultFromUserRequestApi(): ', resultFromUserRequestApi);
         var comment = resultFromUserRequestApi['comment']==null ? '' : resultFromUserRequestApi['comment'];
         const publisher = resultFromBorrowingRequestApi['publisher']==null? '' : resultFromBorrowingRequestApi['publisher'];
         const edition = resultFromBorrowingRequestApi['edition']==null? '' : resultFromBorrowingRequestApi['edition'];

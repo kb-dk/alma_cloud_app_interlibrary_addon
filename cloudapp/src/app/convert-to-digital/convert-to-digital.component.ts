@@ -1,10 +1,10 @@
 import {Subscription} from 'rxjs';
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {
-  Alert,
-  AlertService,
+  AlertService, CloudAppConfigService,
   CloudAppEventsService,
-  CloudAppRestService, CloudAppSettingsService,
+  CloudAppRestService,
+  CloudAppSettingsService,
   Entity,
   EntityType,
   HttpMethod,
@@ -14,12 +14,9 @@ import {
 } from '@exlibris/exl-cloudapp-angular-lib';
 import {AppService} from "../app.service";
 import {FormBuilder} from "@angular/forms";
-import {FormGroupConvertHelper} from "./formGroupConvertHelper";
+import {DigitizationFields} from "./digitizationFields";
 import {ToastrService} from "ngx-toastr";
-import * as url from "url";
-import {formatCurrency} from "@angular/common";
 import {DigitizationRequestCreater} from "./digitizationRequestCreater";
-import {Settings} from "../models/settings";
 
 @Component({
   selector: 'app-convert-to-digital',
@@ -35,22 +32,19 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
   borrowingRequestSelected: boolean = false;
   showBorrowingRequestSelectbox : boolean = false;
   borrowingRequestIsChangeable :boolean = false;
-  selectedBorrowingRequestlink: string;
   userGuideText:string;
   selectedUserRequestlink:string;
-  private getBorrowingRequestOk: boolean = false;
-  private getUserRequestOk: boolean = false;
   private createDigitizationOk: boolean = false;
   private apiError: boolean = false;
   private deleteRequestOk: boolean = false;
   loading = false;
   selectedTitle: string = '';
   showExample: boolean = false;
-  formGroupConvertHelper: FormGroupConvertHelper;
+  digitizationFields: DigitizationFields;
   digitizationRequestCreater: DigitizationRequestCreater;
-  toTextArea:any = ''; //for debugging - remove hidden from html-component
+  toTextArea:any = ''; //for debugging - set hidden=false in html-component
   readyToChangeRequestType : boolean = false;
-  private locationsUsableForDitization: [string];
+  private locationsUsableForDigitization: [string];
   private itemLocationIsValid: boolean = false;
   private locationCodeOfSelectedItem: string = '';
 
@@ -58,6 +52,7 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
               private restService: CloudAppRestService,
               private eventsService: CloudAppEventsService,
               private settingsService: CloudAppSettingsService,
+              private cloudAppConfigService: CloudAppConfigService,
               private toastr: ToastrService,
               private alert: AlertService,
               private formBuilder: FormBuilder)
@@ -65,20 +60,16 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.appService.setTitle('Convert Borrowing Request to Digitization');
-    this.formGroupConvertHelper = new FormGroupConvertHelper();
+    this.digitizationFields = new DigitizationFields();
     this.digitizationRequestCreater = new DigitizationRequestCreater();
     this.pageLoad$ = this.eventsService.onPageLoad(this.onPageLoad);
   }
 
   private updateReadyToChange() {
-    this.readyToChangeRequestType = this.borrowingRequestIsChangeable && this.itemLocationIsValid && this.formGroupConvertHelper.isMmsAndItemIdOK();
-    console.log('this.borrowingRequestIsChangeable: ', this.borrowingRequestIsChangeable);
-    console.log('this.itemLocationIsValid: ', this.itemLocationIsValid);
-    console.log('this.formGroupConvertHelper.isMmsAndItemIdOK(): ', this.formGroupConvertHelper.isMmsAndItemIdOK());
-    console.log('this.readyToChangeRequestType(): ', this.readyToChangeRequestType);
+    this.readyToChangeRequestType = this.borrowingRequestIsChangeable && this.itemLocationIsValid && this.digitizationFields.allFieldsAreSet();
     if(this.readyToChangeRequestType) {
       this.createAlertMessage('Use this item from location (' + this.locationCodeOfSelectedItem +')? Press "Convert to digitization request".', 'info');
-    } else if (this.formGroupConvertHelper.isMmsAndItemIdOK()) {
+    } else if (this.digitizationFields.allFieldsAreSet()) {
       this.createAlertMessage('Location of the selected item (' + this.locationCodeOfSelectedItem + ') is not valid for digitization requests. The location can be added by the General Administrator.', 'error');
     }
   }
@@ -93,7 +84,6 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
 
   setResultFromBorrowingRequestApi(result: any) {
     this._resultFromGetBorrowingRequestApiCall = result;
-    // this.getBorrowingRequestOk = result && Object.keys(result).length > 0; TODO: skal dette bringes i spil (igen)??
   }
 
   getResultFromUserRequestApi() {
@@ -102,13 +92,11 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
 
   setResultFromUserRequestApi(result: any) {
     this._resultFromGetUserRequestApiCall = result;
-    this.getUserRequestOk = result && Object.keys(result).length > 0;
   }
 
   onPageLoad = (pageInfo: PageInfo) => {
     this.pageEntities = pageInfo.entities;
-    this.getLocationsUsableForDitization();
-    console.log('this.locationsUsableForDitization: ', this.locationsUsableForDitization);
+    this.getLocationsUsableForDigitization();
     if(!this.borrowingRequestSelected){
       this.initPage();
     }
@@ -124,13 +112,12 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
     }
   }
 
-  private getLocationsUsableForDitization() {
-    this.settingsService.get().subscribe(result => {
-      console.log('result(get Settings): ', result);
-      if (!result.locationsUsableForDitization) {
+  private getLocationsUsableForDigitization() {
+    this.cloudAppConfigService.get().subscribe(result => {
+      if (!result.locationsUsableForDigitization || result.locationsUsableForDigitization.length==0) {
         this.createAlertMessage('Converting requests cannot be done since there are no valid locations configured for digitization. Please contact your Alma system manager!', 'error');
       } else {
-        this.locationsUsableForDitization = result.locationsUsableForDitization;
+        this.locationsUsableForDigitization = result.locationsUsableForDigitization;
       }
     })
   }
@@ -154,7 +141,7 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
     const onlyOneEntityOnPage = this.pageEntities.length == 1;
     if(onlyOneEntityOnPage){
       this.prepareReadySettingsIfOk();
-    } else {//TODO: mekanikken bag er klar til at bliver simplificeret.
+    } else {
       this.removeUpdateReadySettings();
     }
   }
@@ -165,14 +152,13 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
     const tmpItemId = onlyEntityOnAlmaPage.id;
     var link = onlyEntityOnAlmaPage.link;
     var mmsId = link.split("/")[2];
-    this.formGroupConvertHelper.updateFormWithMmsId(mmsId);
-    this.formGroupConvertHelper.updateFormWithItemId(tmpItemId);
+    this.digitizationFields.setMmsAndItemId(mmsId,tmpItemId);
     this.findAndValidateItemData(onlyEntityOnAlmaPage);
   }
 
   private removeUpdateReadySettings() {
     this.itemLocationIsValid = false;
-    this.formGroupConvertHelper.updateFormWithItemId('');
+    this.digitizationFields.setItemId('');
     this.updateReadyToChange();
     this.alert.clear();//In this case we override showing alert-message.
   }
@@ -191,7 +177,7 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
 
   private initPage() {
     this.alert.clear();
-    this.formGroupConvertHelper = new FormGroupConvertHelper();
+    this.digitizationFields = new DigitizationFields();
     this.userGuideText = "";
     this.toTextArea = '';
     this.setResultFromBorrowingRequestApi(null);
@@ -213,14 +199,13 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
   }
 
   findBorrowingRequestData(entity : Entity){
-    this.selectedBorrowingRequestlink = entity.link;
     const loggerText = 'BorrowingRequestLink: ' + entity.link.toString();
     this.addToDebuggingTextArea(loggerText);
     this.restService.call(entity.link).subscribe(result => {
       this.setResultFromBorrowingRequestApi(result);
       this.selectedUserRequestlink = JSON.stringify(result ['user_request']['link']);
       if(result['status']['value'] === 'REQUEST_CREATED_BOR'){
-        this.updateFormWithSelectedBorrowingRequestValues(result);
+        this.storeSelectedBorrowingRequestValues(result);
         this.userGuideText = 'Locate and view the relevant physical item to use for digitization.';
         this.borrowingRequestIsChangeable = true;
         this.showBorrowingRequestSelectbox = false;
@@ -238,13 +223,12 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
       this.addToDebuggingTextArea(loggerText);
       this.locationCodeOfSelectedItem = result['item_data']['location']['value'];
       this.addToDebuggingTextArea('LocationCode: ' + this.locationCodeOfSelectedItem);
-      if(this.locationsUsableForDitization.length == 1 && this.locationsUsableForDitization[0].includes('*')){
+      if(this.locationsUsableForDigitization.length == 1 && this.locationsUsableForDigitization[0]==='*'){
         this.itemLocationIsValid = true;
       } else {
-        this.itemLocationIsValid = this.locationsUsableForDitization.filter(locationCode => this.locationCodeOfSelectedItem.includes(locationCode)).length > 0;
+        this.itemLocationIsValid = this.locationsUsableForDigitization.filter(locationCode => this.locationCodeOfSelectedItem.toUpperCase().trim()===locationCode.toUpperCase().trim()).length > 0;
       }
       this.updateReadyToChange();
-      console.log('this.readyToChangeRequestType: ', this.readyToChangeRequestType);
     });
   }
 
@@ -255,10 +239,10 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
     this.toTextArea = this.toTextArea + newText;
   }
 
-  private updateFormWithSelectedBorrowingRequestValues(result) {
-    let userId: string = JSON.stringify(result['requester']['value']);
-    let requestId: string = JSON.stringify(result['request_id']);
-    this.formGroupConvertHelper.updateFormWithRequestData(userId, requestId);
+  private storeSelectedBorrowingRequestValues(result) {
+    let userId: string = JSON.stringify(result['requester']['value']).split('"')[1];
+    let requestId: string = JSON.stringify(result['request_id']).split('"')[1];
+    this.digitizationFields.setUserAndRequestId(userId, requestId);
   }
 
   private sendCreateRequest({ url, requestBody }: { url: string; requestBody: any; }) {
@@ -285,18 +269,17 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
     const returnedError = (e.error)['errorCode'] + '  '   + e.message;
     this.createAlertMessage('Failed to create resource sharing request: ' + returnedError, 'error');
     console.log('ErrorMessage from sendCreateRequest API: ', returnedError);
-    this.formGroupConvertHelper = new FormGroupConvertHelper();
+    this.digitizationFields = new DigitizationFields();
   }
 
   private createDigitizationRequestSucceeded(result) {
     this.createDigitizationOk = true;
-    console.log('', 'Created new request (' + (result['request_id']));
+    console.log('', 'Created new request with id(' + (result['request_id']) + ')');
   }
 
   sendDeleteRequest(deleteUrl: string) {
     const loggerText = 'DELETE' + '\n' + deleteUrl;
     this.addToDebuggingTextArea(loggerText);
-    console.log('Deleting: ', loggerText);
     this.apiError = false;
     this.loading = true;
     let request: Request = {
@@ -320,7 +303,7 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
     const returnedError = (e.error)['errorCode'] + '  '   + e.message;
     this.createAlertMessage('Digitization request is created, but failed to delete borrowing request!' + returnedError, 'error');
     console.log('ErrorMessage from sendDeleteRequest API: ', returnedError);
-    this.formGroupConvertHelper = new FormGroupConvertHelper();
+    this.digitizationFields = new DigitizationFields();
   }
 
   private deleteRequestSucceeded(result) {
@@ -347,13 +330,17 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
     });
   }
 
-  submit() {
-    this.convertToDigitizationRequest();
-  }
 //TODO: Tjek at create ikke fejler, hvorefter delete kører og går godt. Husk Refresh page
+/*
+    1. Get userRequest
+    2. Create digitizationRequest
+    3. Delete borrowingRequest
+*/
   convertToDigitizationRequest() {
-    var paramString = "?user_id_type=all_unique&mms_id=" + this.formGroupConvertHelper.getMmsId() + "&item_pid=" + this.formGroupConvertHelper.getItemId();
-    var getUserRequestUrl = '/' + this.selectedUserRequestlink.split('/').slice(3).join('/').replace('"','') + paramString;
+    this.digitizationFields.consoleLogFields();
+    var paramString = "?user_id_type=all_unique&mms_id=" + this.digitizationFields.getMmsId() + "&item_pid=" + this.digitizationFields.getItemId();
+    var userRequestId = this.selectedUserRequestlink.split("/")[6].replace('"','');
+    var getUserRequestUrl = '/almaws/v1/users/'+ this.digitizationFields.getUserId() + '/requests/' + userRequestId + paramString;
     this.loading = true;
     this.restService.call(getUserRequestUrl).subscribe({
       next: result => {
@@ -363,7 +350,6 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
         this.getUserRequestFailed(e);
       }
     });
-//    this.deleteBorrowingIfCreateOk();TODO: Moved to next-section in subscribe
   }
 
   private getUserRequestFailed(e: RestErrorResponse) {
@@ -390,7 +376,7 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
       if (this.createDigitizationOk) {//no error
         const selectedBorrowingRequestId = this.getResultFromBorrowingRequestApi()['request_id'];
         const paramString = '?remove_request=true';
-        const url: any = '/almaws/v1/users/' + this.formGroupConvertHelper.getUserId() + '/resource-sharing-requests/' + selectedBorrowingRequestId;
+        const url: any = '/almaws/v1/users/' + this.digitizationFields.getUserId() + '/resource-sharing-requests/' + selectedBorrowingRequestId;
         //delete the old request
         this.sendDeleteRequest(url);
       } else {//NB: alert-message is allready created in sendDeleteRequest()
@@ -400,12 +386,12 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
   }
 
   private createDigitizationRequest() {
-    const url = this.digitizationRequestCreater.createUrl(this.formGroupConvertHelper);
-    const requestBody = {...this.digitizationRequestCreater.createDigitizationRequestBody(this.formGroupConvertHelper, this.getResultFromBorrowingRequestApi(), this.getResultFromUserRequestApi())};
+    const url = this.digitizationRequestCreater.createUrl(this.digitizationFields);
+    const requestBody = {...this.digitizationRequestCreater.createDigitizationRequestBody(this.digitizationFields, this.getResultFromBorrowingRequestApi(), this.getResultFromUserRequestApi())};
     return {requestBody, url};
   }
 
-  resetForm() {
+  reset() {
     this.initPage();
   }
 

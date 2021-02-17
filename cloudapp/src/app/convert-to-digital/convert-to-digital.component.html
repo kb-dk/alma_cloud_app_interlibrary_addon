@@ -4,13 +4,13 @@
 
 <div *ngIf="showExample">
     <mat-divider></mat-divider><br>
-    <span>A swift way of converting a borrowing request, with a matching local ressource to digitization request</span><br>
+    <span>A swift way of converting a borrowing request, with a matching local resource to digitization request</span><br>
     <span>...you need to:</span><br><br>
-    <span>1. Navigate to "Borrowing Requets" page in Alma.</span><br>
-    <span>2. Select the Borrowing Request in the cloud app selectbox below.</span><br>
-    <span>3. Find an appropriate item to digitize. By the time a sigle item is selected (view- or edit-mode), the "Convert to digitization Request"-button will appear.</span><br>
+    <span>1. Navigate to "Borrowing Requests" page in Alma.</span><br>
+    <span>2. Select the Borrowing Request in the Cloud App select box below.</span><br>
+    <span>3. Find an appropriate item to digitize. By the time a single item is selected (view- or edit-mode), the "Convert to digitization Request"-button will appear.</span><br>
     <span>4. Click "Convert to digitization Request".</span><br>
-    <span>5. Please notice any alertmessages in the cloudApp indicating that an error has orcurred.</span><br><br>
+    <span>5. Please notice any alert messages in the Cloud App indicating that an error has occurred.</span><br><br>
     <mat-divider></mat-divider><br>
 </div>
 
@@ -29,7 +29,6 @@
     <mat-progress-spinner mode="indeterminate" diameter="30"></mat-progress-spinner>
 </div>
     <div class="form-container" *ngIf="showBorrowingRequestSelectbox || borrowingRequestIsChangeable">
-        <form [formGroup]='formGroupConvertHelper.getForm()' (submit)="submit()">
             <div *ngIf="showBorrowingRequestSelectbox else showSelectedTitle">
                 <mat-form-field appearance="outline">
                     <mat-label>Borrowing request</mat-label>
@@ -44,32 +43,9 @@
             <ng-template #showSelectedTitle>
                 <span class="selectedTitle" [innerHTML]="selectedTitle"></span>
             </ng-template>
-            <div [hidden]="true">
-                <mat-form-field class="" appearance="outline">
-                    <mat-label>User Id</mat-label>
-                    <input matInput formControlName="userId" type="text" [required]="true">
-                </mat-form-field>
-                <mat-form-field class="" appearance="outline">
-                    <mat-label>Request Id</mat-label>
-                    <input matInput formControlName="requestId" type="text" [required]="true">
-                </mat-form-field>
-            </div>
-            <div [hidden]="true">
-                <mat-form-field class="form-field" appearance="outline">
-                    <mat-label>MMS ID</mat-label>
-                    <input matInput formControlName="mmsId" type="text" [required]="true">
-                </mat-form-field>
-            </div>
-            <div [hidden]="true">
-                <mat-form-field class="form-field" appearance="outline">
-                    <mat-label>Item Id</mat-label>
-                    <input matInput formControlName="itemId" type="text" [required]="" >
-                </mat-form-field>
-            </div>
-            <button mat-raised-button color="primary" type="submit" [disabled]="!readyToChangeRequestType">Convert to digitization request</button>
-            <a mat-raised-button color="secondary" (click)="resetForm()">Reset</a>
-        </form>
-        <textarea [hidden]="false">{{toTextArea}}</textarea> <!-- Usefull for testing-->
+            <button mat-raised-button color="primary" [disabled]="!readyToChangeRequestType" (click)="convertToDigitizationRequest()">Convert to digitization request</button>
+            <a mat-raised-button color="secondary" (click)="reset()">Reset</a>
+           <textarea [hidden]="true">{{toTextArea}}</textarea> <!-- Usefull for testing -change hidden to false!-->
     </div>
 
 
