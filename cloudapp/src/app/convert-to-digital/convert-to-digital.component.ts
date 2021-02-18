@@ -1,7 +1,8 @@
 import {Subscription} from 'rxjs';
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {
-  AlertService, CloudAppConfigService,
+  AlertService,
+  CloudAppConfigService,
   CloudAppEventsService,
   CloudAppRestService,
   CloudAppSettingsService,
@@ -13,7 +14,6 @@ import {
   RestErrorResponse
 } from '@exlibris/exl-cloudapp-angular-lib';
 import {AppService} from "../app.service";
-import {FormBuilder} from "@angular/forms";
 import {DigitizationFields} from "./digitizationFields";
 import {ToastrService} from "ngx-toastr";
 import {DigitizationRequestCreater} from "./digitizationRequestCreater";
@@ -47,6 +47,8 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
   private locationsUsableForDigitization: [string];
   private itemLocationIsValid: boolean = false;
   private locationCodeOfSelectedItem: string = '';
+  private idOfCreatedDigitizationRequest: string = '';
+
 
   constructor(private appService: AppService,
               private restService: CloudAppRestService,
@@ -54,12 +56,11 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
               private settingsService: CloudAppSettingsService,
               private cloudAppConfigService: CloudAppConfigService,
               private toastr: ToastrService,
-              private alert: AlertService,
-              private formBuilder: FormBuilder)
+              private alert: AlertService)
   { }
 
   ngOnInit() {
-    this.appService.setTitle('Convert Borrowing Request to Digitization');
+    this.appService.setTitle('Convert Borrowing Request to Digitization Requests');
     this.digitizationFields = new DigitizationFields();
     this.digitizationRequestCreater = new DigitizationRequestCreater();
     this.pageLoad$ = this.eventsService.onPageLoad(this.onPageLoad);
@@ -187,7 +188,8 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
     this.showBorrowingRequestSelectbox = false;
     this.borrowingRequestSelected = false;
     this.itemLocationIsValid = false;
-    this.locationCodeOfSelectedItem = ''
+    this.locationCodeOfSelectedItem = '';
+    this.idOfCreatedDigitizationRequest = '';
     this.updateReadyToChange();
   }
 
@@ -206,7 +208,7 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
       this.selectedUserRequestlink = JSON.stringify(result ['user_request']['link']);
       if(result['status']['value'] === 'REQUEST_CREATED_BOR'){
         this.storeSelectedBorrowingRequestValues(result);
-        this.userGuideText = 'Locate and view the relevant physical item to use for digitization.';
+        this.userGuideText = 'Find and view the relevant physical item to use for digitization in Alma.';
         this.borrowingRequestIsChangeable = true;
         this.showBorrowingRequestSelectbox = false;
       }else{
@@ -239,6 +241,13 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
     this.toTextArea = this.toTextArea + newText;
   }
 
+  private addToUserGuideText(newText: string) {
+    if(this.userGuideText !== ''){
+      this.userGuideText = this.userGuideText + '<br>';
+    }
+    this.userGuideText = this.userGuideText + newText;
+  }
+
   private storeSelectedBorrowingRequestValues(result) {
     let userId: string = JSON.stringify(result['requester']['value']).split('"')[1];
     let requestId: string = JSON.stringify(result['request_id']).split('"')[1];
@@ -246,6 +255,7 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
   }
 
   private sendCreateRequest({ url, requestBody }: { url: string; requestBody: any; }) {
+    this.addToUserGuideText('Creating Digitization Request...');
     const loggerText = 'DIGITIZATION' + '\n' + url + '\n' + JSON.stringify(requestBody);
     this.addToDebuggingTextArea(loggerText);
     this.apiError = false;
@@ -265,7 +275,7 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
   }
 
   private createDigitizationRequestFailed(e: RestErrorResponse) {
-    this.apiError = true;//TODO: Bruges dette??
+    this.apiError = true;
     const returnedError = (e.error)['errorCode'] + '  '   + e.message;
     this.createAlertMessage('Failed to create resource sharing request: ' + returnedError, 'error');
     console.log('ErrorMessage from sendCreateRequest API: ', returnedError);
@@ -273,8 +283,10 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
   }
 
   private createDigitizationRequestSucceeded(result) {
+    this.addToUserGuideText('Digitization Request created!');
     this.createDigitizationOk = true;
-    console.log('', 'Created new request with id(' + (result['request_id']) + ')');
+    this.idOfCreatedDigitizationRequest = result['request_id'];
+    console.log('', 'Created new request with id(' + this.idOfCreatedDigitizationRequest + ')');
   }
 
   sendDeleteRequest(deleteUrl: string) {
@@ -307,11 +319,14 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
   }
 
   private deleteRequestSucceeded(result) {
+    this.addToUserGuideText('Done! :-)');
     this.toTextArea = this.toTextArea + '\n' + '\n' + result
     this.deleteRequestOk = true;
     this.loading = false;
-    this.createAlertMessage('BorrowingRequest is converted and deleted', 'success');
-    console.log('BorrowingRequest is converted and deleted(): ', 'BorrowingRequest is converted and deleted');
+    this.createAlertMessage('BorrowingRequest is converted. Id of Digitization Request: ' + this.idOfCreatedDigitizationRequest + '.', 'success');
+    this.idOfCreatedDigitizationRequest = '';
+    console.log('BorrowingRequest is converted and deleted(): ', 'BorrowingRequest is converted.');
+    this.readyToChangeRequestType = false;//shortcut for disabling "Convert to digitization request"-button without creating alert-message.
     this.refreshPage();
   }
 
@@ -330,7 +345,6 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
     });
   }
 
-//TODO: Tjek at create ikke fejler, hvorefter delete kører og går godt. Husk Refresh page
 /*
     1. Get userRequest
     2. Create digitizationRequest
@@ -338,6 +352,7 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
 */
   convertToDigitizationRequest() {
     this.digitizationFields.consoleLogFields();
+    this.userGuideText = 'Convertion process startet...'
     var paramString = "?user_id_type=all_unique&mms_id=" + this.digitizationFields.getMmsId() + "&item_pid=" + this.digitizationFields.getItemId();
     var userRequestId = this.selectedUserRequestlink.split("/")[6].replace('"','');
     var getUserRequestUrl = '/almaws/v1/users/'+ this.digitizationFields.getUserId() + '/requests/' + userRequestId + paramString;
@@ -361,7 +376,7 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
   }
 
   private getUserRequestSucceeded(result) {
-    this.loading = false;
+    this.addToUserGuideText('Data for creating recieved.');
     this.setResultFromUserRequestApi(JSON.stringify(result));
     const {requestBody, url} = this.createDigitizationRequest();
     this.sendCreateRequest({url, requestBody});
@@ -374,8 +389,9 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
         await this.delay(1000);
       }
       if (this.createDigitizationOk) {//no error
+        this.addToUserGuideText("Processing Borrowing Request...");
         const selectedBorrowingRequestId = this.getResultFromBorrowingRequestApi()['request_id'];
-        const paramString = '?remove_request=true';
+        const paramString = '?remove_request=true&notify_user=false';//Not in use, at the moment.
         const url: any = '/almaws/v1/users/' + this.digitizationFields.getUserId() + '/resource-sharing-requests/' + selectedBorrowingRequestId;
         //delete the old request
         this.sendDeleteRequest(url);

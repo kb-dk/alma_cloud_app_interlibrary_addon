@@ -14,7 +14,7 @@ export class ConfigurationComponent implements OnInit {
   saving = false;
   newLocation: string;
   private savedOk: boolean = false;
-  private showExample: boolean = false;
+  public showExample: boolean = false;
 
   constructor(
       private appService: AppService,
@@ -43,7 +43,7 @@ export class ConfigurationComponent implements OnInit {
   private saveLocations(createNew: boolean) {
     this.saving = true;
     this.cloudAppConfigService.set(this.configuration).subscribe(
-        response => {
+        () => {
           this.savedOk = true;
           if(!createNew) {
             this.toastr.success("Locations updated.")
