@@ -1,0 +1,24 @@
+button {
+  margin-right: 1em;
+}
+
+.selectedTitle {
+  display: block;
+  padding-bottom: 1em;
+  color: #555555e0;
+}
+
+.invisible {
+  display: block;
+  visibility: hidden;
+  height: 0;
+  width: 0;
+}
+textarea {
+  width: 50em;
+  height: 15em;
+}
+
+#ngSummarySectionContainer {
+  position: absolute;
+}

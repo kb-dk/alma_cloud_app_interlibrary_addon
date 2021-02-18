@@ -1,0 +1,51 @@
+<app-topmenu></app-topmenu>
+
+<mat-icon class="info-icon" (click)="toggleShowExample()" color="primary">info</mat-icon><br>
+
+<div *ngIf="showExample">
+    <mat-divider></mat-divider><br>
+    <span>A swift way of converting a borrowing request, with a matching local resource to digitization request</span><br>
+    <span>...you need to:</span><br><br>
+    <span>1. Navigate to "Borrowing Requests" page in Alma.</span><br>
+    <span>2. Select the Borrowing Request in the Cloud App select box below.</span><br>
+    <span>3. Find an appropriate item to digitize. By the time a single item is selected (view- or edit-mode), the "Convert to digitization Request"-button will appear.</span><br>
+    <span>4. Click "Convert to digitization Request".</span><br>
+    <span>5. Please notice any alert messages in the Cloud App indicating that an error has occurred.</span><br><br>
+    <mat-divider></mat-divider><br>
+</div>
+
+<div *ngIf="!borrowingRequestSelected && !showBorrowingRequestSelectbox">
+    <p>
+        Please navigate to the Borrowing Requests page in Alma.
+    </p>
+</div>
+
+<div class="align-center">
+    <h4 [innerHTML]='userGuideText'></h4>
+</div>
+
+
+<div class="loading-shade" *ngIf="loading">
+    <mat-progress-spinner mode="indeterminate" diameter="30"></mat-progress-spinner>
+</div>
+    <div class="form-container" *ngIf="showBorrowingRequestSelectbox || borrowingRequestIsChangeable">
+            <div *ngIf="showBorrowingRequestSelectbox else showSelectedTitle">
+                <mat-form-field appearance="outline">
+                    <mat-label>Borrowing request</mat-label>
+                    <mat-select (selectionChange)="borrowingRequestSelectedByUser($event.value)" >
+                        <mat-option [value]="0">None</mat-option>
+                        <mat-option *ngFor="let entity of pageEntities" [value]="entity">
+                            {{entity.description| truncate : 50}} - {{entity.id}}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+            <ng-template #showSelectedTitle>
+                <span class="selectedTitle" [innerHTML]="selectedTitle"></span>
+            </ng-template>
+            <button mat-raised-button color="primary" [disabled]="!readyToChangeRequestType" (click)="convertToDigitizationRequest()">Convert to digitization request</button>
+            <a mat-raised-button color="secondary" (click)="reset()">Reset</a>
+           <textarea [hidden]="true">{{toTextArea}}</textarea> <!-- Usefull for testing -change hidden to false!-->
+    </div>
+
+
