@@ -13,6 +13,8 @@ export class DigitizationRequestCreater {
 
     public createDigitizationRequestBody(digitizationFields:DigitizationFields, resultFromBorrowingRequestApi:any, resultFromUserRequestApi:any) {
         var digitizationRequestBody = Object.create(null);
+        var comment:string = '';
+        comment = DigitizationRequestCreater.startCommentWithExtraInfo(resultFromBorrowingRequestApi, comment)
         DigitizationRequestCreater.addProperty(digitizationRequestBody, "user_primary_id", resultFromBorrowingRequestApi['requester']['value']);
         DigitizationRequestCreater.setLastInterestDate(digitizationRequestBody, resultFromBorrowingRequestApi);
         DigitizationRequestCreater.addProperty(digitizationRequestBody,"request_type","DIGITIZATION");
@@ -23,31 +25,57 @@ export class DigitizationRequestCreater {
         DigitizationRequestCreater.addProperty(digitizationRequestBody, 'partial_digitization', 'true');
         DigitizationRequestCreater.addProperty(digitizationRequestBody, 'chapter_or_article_title', resultFromBorrowingRequestApi['title']);
         DigitizationRequestCreater.addProperty(digitizationRequestBody, 'chapter_or_article_author', resultFromBorrowingRequestApi['author']);
-        DigitizationRequestCreater.setRequiredPages(digitizationRequestBody, resultFromBorrowingRequestApi);
+        comment = this.handlePages(comment, resultFromBorrowingRequestApi, digitizationRequestBody);
         DigitizationRequestCreater.addProperty(digitizationRequestBody, "date_of_publication", resultFromBorrowingRequestApi['year']);
-        const volume = resultFromBorrowingRequestApi['volume'];
-        if(typeof volume === 'number') {
-            DigitizationRequestCreater.addProperty(digitizationRequestBody, "volume", volume);
-        } else {
-            DigitizationRequestCreater.addProperty(digitizationRequestBody, "volume", '');
-        }
-        const issue = resultFromBorrowingRequestApi['issue'];
-        if(typeof issue === 'number') {
-            DigitizationRequestCreater.addProperty(digitizationRequestBody, "issue", issue);
-        }else {
-            DigitizationRequestCreater.addProperty(digitizationRequestBody, "issue", '');
-        }
-        DigitizationRequestCreater.setCommentWithExtraInfo(digitizationRequestBody, resultFromBorrowingRequestApi, resultFromUserRequestApi);
+        comment = DigitizationRequestCreater.addValueAsPropertyOrCommentIfNotNumber(resultFromBorrowingRequestApi, digitizationRequestBody, comment, 'volume');
+        comment = DigitizationRequestCreater.addValueAsPropertyOrCommentIfNotNumber(resultFromBorrowingRequestApi, digitizationRequestBody, comment, 'issue');
+        DigitizationRequestCreater.endCommentWithExtraInfo(digitizationRequestBody, resultFromUserRequestApi, comment);
         return digitizationRequestBody;
     }
 
-    private static setRequiredPages(digitizationRequestBody, resultFromBorrowingRequestApi) {
-        var requiredPageRangeObject = {
-            from_page: resultFromBorrowingRequestApi['start_page'],
-            to_page: resultFromBorrowingRequestApi['end_page']
-        };
+    private handlePages(comment: string, resultFromBorrowingRequestApi: any, digitizationRequestBody) {
+        comment = DigitizationRequestCreater.addValueAsCommentIfNotEmpty(resultFromBorrowingRequestApi, comment, 'pages');
+        return DigitizationRequestCreater.setRequiredPagesOrAddToCommentIfNotNumbers(digitizationRequestBody, resultFromBorrowingRequestApi, comment);
+    }
+
+    private static addValueAsPropertyOrCommentIfNotNumber(resultFromBorrowingRequestApi: any, digitizationRequestBody, comment: string, propertyName:string):string {
+        const propertyValue = resultFromBorrowingRequestApi[propertyName];
+        if (typeof propertyValue === 'number') {
+            DigitizationRequestCreater.addProperty(digitizationRequestBody, propertyName, propertyValue);
+        } else {
+            DigitizationRequestCreater.addProperty(digitizationRequestBody, propertyName, '');
+            comment = comment.concat(' ').concat(propertyName).concat(': ').concat(propertyValue);
+        }
+        return comment;
+    }
+
+    private static addValueAsCommentIfNotEmpty(resultFromBorrowingRequestApi: any, comment: string, propertyName:string):string {
+        const propertyValue = resultFromBorrowingRequestApi[propertyName];
+        if (!propertyValue.isEmpty) {
+            comment = comment.concat(' ').concat(propertyName).concat(': ').concat(propertyValue);
+        }
+        return comment;
+    }
+
+    private static setRequiredPagesOrAddToCommentIfNotNumbers(digitizationRequestBody, resultFromBorrowingRequestApi, comment:string):string {
+        const startPageValue = resultFromBorrowingRequestApi['start_page'];
+        const endPageValue = resultFromBorrowingRequestApi['end_page'];
+        var requiredPageRangeObject;
+        if (typeof startPageValue === 'number' && typeof endPageValue === 'number' ) {
+            requiredPageRangeObject = {
+                from_page: resultFromBorrowingRequestApi['start_page'],
+                to_page: resultFromBorrowingRequestApi['end_page']
+            };
+        } else {
+            requiredPageRangeObject = {
+                from_page: '',
+                to_page: ''
+            };
+            comment = comment.concat(' Frompage: ').concat(startPageValue).concat(' ToPage: ' ).concat(endPageValue);//API doesn't like not numbers, so we add it in the comment!
+        }
         var requiredPageRangeArray = [requiredPageRangeObject];
         DigitizationRequestCreater.addProperty(digitizationRequestBody, "required_pages_range", requiredPageRangeArray);
+        return comment;
     }
 
     private static setTargetDestination(digitizationRequestBody) {
@@ -69,16 +97,18 @@ export class DigitizationRequestCreater {
         DigitizationRequestCreater.addProperty(digitizationRequestBody, 'last_interest_date', date);
     }
 
-    private static setCommentWithExtraInfo(digitizationRequest, resultFromBorrowingRequestApi, resultFromUserRequestApi) {
-        var comment = resultFromUserRequestApi['comment']==null ? '' : resultFromUserRequestApi['comment'];
+    private static startCommentWithExtraInfo(resultFromBorrowingRequestApi, comment:string):string {
         const cloudAppPrefix = 'Created using Alma Interlibrary Add-on Cloud App! '
         const publisher = resultFromBorrowingRequestApi['publisher']==null? '' : resultFromBorrowingRequestApi['publisher'];
         const edition = resultFromBorrowingRequestApi['edition']==null? '' : resultFromBorrowingRequestApi['edition'];
-        const volume = typeof (resultFromBorrowingRequestApi['volume'])=== 'number'? '' : resultFromBorrowingRequestApi['volume'];
-        const issue = typeof (resultFromBorrowingRequestApi['issue'])=== 'number'? '' : resultFromBorrowingRequestApi['issue'];
-        comment  = cloudAppPrefix + 'Publisher: ' +  publisher + '  Edition: ' + edition + '  Usercomment: ' + comment + '  Volume: ' + volume + '  Issue: ' + issue;
-        DigitizationRequestCreater.addProperty(digitizationRequest, 'comment', comment == null ? '' : comment);
-        }
+        return comment.concat(cloudAppPrefix).concat(' Publisher: ').concat(publisher).concat('  Edition: ').concat(edition);
+    }
+
+    private static endCommentWithExtraInfo(digitizationRequest, resultFromUserRequestApi, comment:string) {
+        var originalComment = resultFromUserRequestApi['comment']==null ? '' : resultFromUserRequestApi['comment'];
+        comment = comment.concat(' Usercomment: ').concat(originalComment);
+        DigitizationRequestCreater.addProperty(digitizationRequest, 'comment', comment);
+    }
 
     private static addProperty(requestObject: {}, key:string, value:any) {
         requestObject[key] = value;

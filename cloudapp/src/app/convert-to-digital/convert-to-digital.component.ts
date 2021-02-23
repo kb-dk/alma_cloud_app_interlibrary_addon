@@ -17,6 +17,7 @@ import {AppService} from "../app.service";
 import {DigitizationFields} from "./digitizationFields";
 import {ToastrService} from "ngx-toastr";
 import {DigitizationRequestCreater} from "./digitizationRequestCreater";
+import {Configuration} from "../models/configuration";
 
 @Component({
   selector: 'app-convert-to-digital',
@@ -44,10 +45,14 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
   digitizationRequestCreater: DigitizationRequestCreater;
   toTextArea:any = ''; //for debugging - set hidden=false in html-component
   readyToChangeRequestType : boolean = false;
+  private configuration: Configuration = new Configuration();
   private locationsUsableForDigitization: [string];
+  private itemPoliciesUsableForDigitization: [string];
   private itemLocationIsValid: boolean = false;
   private locationCodeOfSelectedItem: string = '';
+  private itemPolicyDescriptionOfSelectedItem: string = '';
   private idOfCreatedDigitizationRequest: string = '';
+  private useLocationCodesForItemValidation: boolean = false;
 
 
   constructor(private appService: AppService,
@@ -71,7 +76,11 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
     if(this.readyToChangeRequestType) {
       this.createAlertMessage('Use this item from location (' + this.locationCodeOfSelectedItem +')? Press "Convert to digitization request".', 'info');
     } else if (this.digitizationFields.allFieldsAreSet()) {
-      this.createAlertMessage('Location of the selected item (' + this.locationCodeOfSelectedItem + ') is not valid for digitization requests. The location can be added by the General Administrator.', 'error');
+      if(this.useLocationCodesForItemValidation) {
+        this.createAlertMessage('Location of the selected item (' + this.locationCodeOfSelectedItem + ') is not valid for digitization requests. The location can be added by the General Administrator.', 'error');
+      }else{
+        this.createAlertMessage('Item policy of the selected item (' + this.itemPolicyDescriptionOfSelectedItem + ') is not valid for digitization requests. Item policy can be added by the General Administrator.', 'error');
+      }
     }
   }
 
@@ -97,7 +106,7 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
 
   onPageLoad = (pageInfo: PageInfo) => {
     this.pageEntities = pageInfo.entities;
-    this.getLocationsUsableForDigitization();
+    this.getConfiguration();
     if(!this.borrowingRequestSelected){
       this.initPage();
     }
@@ -113,12 +122,17 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
     }
   }
 
-  private getLocationsUsableForDigitization() {
+  private getConfiguration() {
     this.cloudAppConfigService.get().subscribe(result => {
-      if (!result.locationsUsableForDigitization || result.locationsUsableForDigitization.length==0) {
-        this.createAlertMessage('Converting requests cannot be done since there are no valid locations configured for digitization. Please contact your Alma system manager!', 'error');
+      this.configuration = result;
+      const validLocationsInConfig:boolean = result.locationsUsableForDigitization && result.locationsUsableForDigitization.length>0;
+      const validItemPoliciesInConfig: boolean = result.itemPoliciesUsableForDigitization && result.itemPoliciesUsableForDigitization.length>0;
+      if (!validLocationsInConfig && !validItemPoliciesInConfig) {
+        this.createAlertMessage('Converting requests cannot be done since there are no valid locations or item policies configured for digitization. Please contact your Alma system manager!', 'error');
       } else {
         this.locationsUsableForDigitization = result.locationsUsableForDigitization;
+        this.useLocationCodesForItemValidation = result.useLocationCodeAsValidationCriteria;
+        this.itemPoliciesUsableForDigitization = result.itemPoliciesUsableForDigitization;
       }
     })
   }
@@ -189,6 +203,7 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
     this.borrowingRequestSelected = false;
     this.itemLocationIsValid = false;
     this.locationCodeOfSelectedItem = '';
+    this.itemPolicyDescriptionOfSelectedItem = '';
     this.idOfCreatedDigitizationRequest = '';
     this.updateReadyToChange();
   }
@@ -224,14 +239,26 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
       loggerText = 'Result from ItemRequest: /n ' + JSON.stringify(result);
       this.addToDebuggingTextArea(loggerText);
       this.locationCodeOfSelectedItem = result['item_data']['location']['value'];
-      this.addToDebuggingTextArea('LocationCode: ' + this.locationCodeOfSelectedItem);
-      if(this.locationsUsableForDigitization.length == 1 && this.locationsUsableForDigitization[0]==='*'){
-        this.itemLocationIsValid = true;
-      } else {
-        this.itemLocationIsValid = this.locationsUsableForDigitization.filter(locationCode => this.locationCodeOfSelectedItem.toUpperCase().trim()===locationCode.toUpperCase().trim()).length > 0;
-      }
+      this.itemPolicyDescriptionOfSelectedItem = result['item_data']['policy']['desc'];
+      this.setItemValidationInfoFromConfig();
       this.updateReadyToChange();
     });
+  }
+
+  private setItemValidationInfoFromConfig() {
+    if (this.useLocationCodesForItemValidation) {
+      if (this.locationsUsableForDigitization.length == 1 && this.locationsUsableForDigitization[0] === '*') {
+        this.itemLocationIsValid = true;
+      } else {
+        this.itemLocationIsValid = this.locationsUsableForDigitization.filter(locationCode => this.locationCodeOfSelectedItem.toUpperCase().trim() === locationCode.toUpperCase().trim()).length > 0;
+      }
+    } else {
+      if (this.itemPoliciesUsableForDigitization.length == 1 && this.itemPoliciesUsableForDigitization[0] === '*') {
+        this.itemLocationIsValid = true;
+      } else {
+        this.itemLocationIsValid = this.itemPoliciesUsableForDigitization.filter(itemPolicyDesciption => this.itemPolicyDescriptionOfSelectedItem.toUpperCase().trim() === itemPolicyDesciption.toUpperCase().trim()).length > 0;
+      }
+    }
   }
 
   private addToDebuggingTextArea(newText: string) {
@@ -259,6 +286,7 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
     const loggerText = 'DIGITIZATION' + '\n' + url + '\n' + JSON.stringify(requestBody);
     this.addToDebuggingTextArea(loggerText);
     this.apiError = false;
+    this.createDigitizationOk = false;
     let request: Request = {
       url,
       method: HttpMethod.POST,
@@ -276,6 +304,7 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
 
   private createDigitizationRequestFailed(e: RestErrorResponse) {
     this.apiError = true;
+    this.loading = false;
     const returnedError = (e.error)['errorCode'] + '  '   + e.message;
     this.createAlertMessage('Failed to create resource sharing request: ' + returnedError, 'error');
     console.log('ErrorMessage from sendCreateRequest API: ', returnedError);
@@ -286,7 +315,6 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
     this.addToUserGuideText('Digitization Request created!');
     this.createDigitizationOk = true;
     this.idOfCreatedDigitizationRequest = result['request_id'];
-    console.log('', 'Created new request with id(' + this.idOfCreatedDigitizationRequest + ')');
   }
 
   sendDeleteRequest(deleteUrl: string) {
@@ -323,7 +351,7 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
     this.toTextArea = this.toTextArea + '\n' + '\n' + result
     this.deleteRequestOk = true;
     this.loading = false;
-    this.createAlertMessage('BorrowingRequest is converted. Id of Digitization Request: ' + this.idOfCreatedDigitizationRequest + '.', 'success');
+    this.createAlertMessage('BorrowingRequest is converted. Id of Digitization Request is: ' + this.idOfCreatedDigitizationRequest + '.', 'success');
     this.idOfCreatedDigitizationRequest = '';
     console.log('BorrowingRequest is converted and deleted(): ', 'BorrowingRequest is converted.');
     this.readyToChangeRequestType = false;//shortcut for disabling "Convert to digitization request"-button without creating alert-message.
@@ -352,6 +380,7 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
 */
   convertToDigitizationRequest() {
     this.digitizationFields.consoleLogFields();
+    this.apiError = false;
     this.userGuideText = 'Convertion process startet...'
     var paramString = "?user_id_type=all_unique&mms_id=" + this.digitizationFields.getMmsId() + "&item_pid=" + this.digitizationFields.getItemId();
     var userRequestId = this.selectedUserRequestlink.split("/")[6].replace('"','');
@@ -385,14 +414,15 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
 
   private deleteBorrowingIfCreateOk() {
     (async () => {
-      while (!this.createDigitizationOk || this.apiError) {// wait for post
+      while (!this.createDigitizationOk && !this.apiError) {// wait for post
         await this.delay(1000);
       }
       if (this.createDigitizationOk) {//no error
         this.addToUserGuideText("Processing Borrowing Request...");
         const selectedBorrowingRequestId = this.getResultFromBorrowingRequestApi()['request_id'];
+        // const paramString = '?remove_request=false&notify_user=false';//Not in use, at the moment.
         const paramString = '?remove_request=true&notify_user=false';//Not in use, at the moment.
-        const url: any = '/almaws/v1/users/' + this.digitizationFields.getUserId() + '/resource-sharing-requests/' + selectedBorrowingRequestId;
+        const url: any = '/almaws/v1/users/' + this.digitizationFields.getUserId() + '/resource-sharing-requests/' + selectedBorrowingRequestId+paramString;
         //delete the old request
         this.sendDeleteRequest(url);
       } else {//NB: alert-message is allready created in sendDeleteRequest()

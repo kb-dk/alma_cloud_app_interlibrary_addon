@@ -43,9 +43,9 @@ export class SettingsComponent implements OnInit {
     this.saving = true;
     this.settingsService.set(this.settings).subscribe(
         response => {
-            this.toastr.success(toastMessage);
+            this.toastr.success(toastMessage, 'Settings updated', {timeOut:10000});
         },
-        err => this.toastr.error(err.message),
+        err => this.toastr.error(err.message, '', {timeOut:10000}),
         () => this.saving = false
     );
     this.saving = false;

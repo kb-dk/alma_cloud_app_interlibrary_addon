@@ -5,7 +5,8 @@
    "subtitle": "NEW: Convert Borrowing Request to digitization in a few clicks. Still has: templates for external localization of Borrowing Request materials..",
    "author": "Royal Danish Libraty, Denmark",
    "pages": {
-      "settings": "/#/settings"
+      "settings": "/#/settings",
+      "config": "/#/config"
    },
    "icon": {
       "type": "font",

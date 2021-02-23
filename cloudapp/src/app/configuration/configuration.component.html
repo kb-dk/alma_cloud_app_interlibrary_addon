@@ -12,32 +12,73 @@
     <mat-divider></mat-divider><br>
 </div>
 
-<h3 class="subheading-1">Add location codes for "Convert Borrowing Request to Digitization Request":</h3>
-<mat-form-field appearance="outline">
-    <mat-label>Location code</mat-label>
-    <input matInput [(ngModel)]="newLocation"  [maxLength]="50">
-</mat-form-field>
-<div mat-dialog-actions>
-    <button mat-raised-button color="primary" (click)="saveNewLocation()">Save location code</button>
-</div><br>
+<h3 class="subheading-1">Select the "attribute-type", that is used for controlling access to creatin digitization requests:</h3>
+<form>
+    <input type="radio" value="L" name="valType"  (change)="validationTypeChanged('L')" [ngModel]="selectedValidationType"> Location code <br>
+    <input type="radio" value="P" name="valType"  (change)="validationTypeChanged('P')" [ngModel]="selectedValidationType"> Item Policy
+</form>
+<br>
+<div *ngIf="selectedValidationType==='L'">
+    <h3 class="subheading-1">Add location codes for "Convert Borrowing Request to Digitization Request":</h3>
+    <mat-form-field appearance="outline">
+        <mat-label>Location code</mat-label>
+        <input matInput [(ngModel)]="newLocation"  [maxLength]="50">
+    </mat-form-field>
+    <div mat-dialog-actions>
+        <button mat-raised-button color="primary" (click)="saveNewLocation()">Save location code</button>
+    </div><br>
 
 
-<h3 class="subheading-1">Valid localization codes for digitization are:</h3>
-<div *ngIf="configuration && configuration.locationsUsableForDigitization.length>0 else noDigitizationLocations">
-    <mat-list *ngFor="let location of configuration.locationsUsableForDigitization">
-        <mat-list-item>
+    <h3 class="subheading-1">Valid localization codes for digitization are:</h3>
+    <div *ngIf="configuration && configuration.locationsUsableForDigitization.length>0 else noDigitizationLocations">
+        <mat-list *ngFor="let location of configuration.locationsUsableForDigitization">
+            <mat-list-item>
 
-            <span>{{location}}</span><span *ngIf="location==='*'&&configuration.locationsUsableForDigitization.length==1"> (All locations are valid!)</span>
-            <!--  TODO: JJEG ExLibris Way(https://developers.exlibrisgroup.com/cloudapps/docs/style/#colors) - dosn't work.
-                    <i class="uxf-icon uxf-close eca-button" (click)="remove(item)">delete</i>
-            -->
-            <mat-icon matListIcon (click)="remove(location)">delete</mat-icon>
-        </mat-list-item>
-    </mat-list>
+                <span>{{location}}</span><span *ngIf="location==='*'&&configuration.locationsUsableForDigitization.length==1"> (All locations are valid!)</span>
+                <!--  TODO: JJEG ExLibris Way(https://developers.exlibrisgroup.com/cloudapps/docs/style/#colors) - dosn't work.
+                        <i class="uxf-icon uxf-close eca-button" (click)="remove(item)">delete</i>
+                -->
+                <mat-icon matListIcon (click)="removeLocationCode(location)">delete</mat-icon>
+            </mat-list-item>
+        </mat-list>
+    </div>
+
+    <ng-template #noDigitizationLocations>
+        <div id="emptyLocationsList">
+            <p>There are no location codes for digitization! Type the new location code in the input field and click the 'Save location code'-button.</p>
+        </div>
+    </ng-template>
 </div>
 
-<ng-template #noDigitizationLocations>
-    <div id="emptyList">
-        <p>There are no location codes for digitization! Type the new location code in the input field and click the 'Save location code'-button.</p>
+<div *ngIf="selectedValidationType==='P'">
+    <h3 class="subheading-1">Add item policies for "Convert Borrowing Request to Digitization Request":</h3>
+    <mat-form-field appearance="outline">
+        <mat-label>Item Policy</mat-label>
+        <input matInput [(ngModel)]="newItemPolicy"  [maxLength]="75">
+    </mat-form-field>
+    <div mat-dialog-actions>
+        <button mat-raised-button color="primary" (click)="saveNewItemPolicy()">Save item policy</button>
+    </div><br>
+
+
+    <h3 class="subheading-1">Valid item policies for digitization are:</h3>
+    <div *ngIf="configuration && configuration.itemPoliciesUsableForDigitization.length>0 else noDigitizationItemPolicies">
+        <mat-list *ngFor="let itemPolicy of configuration.itemPoliciesUsableForDigitization">
+            <mat-list-item>
+
+                <span>{{itemPolicy}}</span><span *ngIf="itemPolicy==='*'&&configuration.itemPoliciesUsableForDigitization.length==1"> (All item policies are valid!)</span>
+                <!--  TODO: JJEG ExLibris Way(https://developers.exlibrisgroup.com/cloudapps/docs/style/#colors) - dosn't work.
+                        <i class="uxf-icon uxf-close eca-button" (click)="remove(item)">delete</i>
+                -->
+                <mat-icon matListIcon (click)="removeItemPolicy(itemPolicy)">delete</mat-icon>
+            </mat-list-item>
+        </mat-list>
     </div>
-</ng-template>
+
+    <ng-template #noDigitizationItemPolicies>
+        <div id="emptyList">
+            <p>There are no item policies for digitization! Type the new item policy in the input field and click the 'Save item policy'-button.</p>
+        </div>
+    </ng-template>
+
+</div>

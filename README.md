@@ -18,5 +18,5 @@ Futher information can be found by pressing the info-icon in "Add template" dial
 Convert Borrowing Request to Digitization Request in just a few clicks
 
 #### How to use "Convert Borrowing Requests to Digitization Request"
-1. Location codes valid for digitization (institution wide) must be configured by user-role “General Administrator“! in the configuration part of the Cloud App. Look for the wrench-symbol.
+1. Location codes/Item policies valid for digitization (institution wide) must be configured by user-role “General Administrator“! in the configuration part of the Cloud App. Look for the wrench-symbol.
 2. Fulfillment Services Operator can now use the "Convert Borrowing Requests to Digitization Request"-feature in this way: Select the Borrowing Request for convertion in the Cloud App. Find the relevant physical item and view it in Alma and click the convert-button in the Cloud App.
