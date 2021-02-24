@@ -25,7 +25,7 @@ export class DigitizationRequestCreater {
         DigitizationRequestCreater.addProperty(digitizationRequestBody, 'partial_digitization', 'true');
         DigitizationRequestCreater.addProperty(digitizationRequestBody, 'chapter_or_article_title', resultFromBorrowingRequestApi['title']);
         DigitizationRequestCreater.addProperty(digitizationRequestBody, 'chapter_or_article_author', resultFromBorrowingRequestApi['author']);
-        comment = this.handlePages(comment, resultFromBorrowingRequestApi, digitizationRequestBody);
+        comment = DigitizationRequestCreater.handlePages(comment, resultFromBorrowingRequestApi, digitizationRequestBody);
         DigitizationRequestCreater.addProperty(digitizationRequestBody, "date_of_publication", resultFromBorrowingRequestApi['year']);
         comment = DigitizationRequestCreater.addValueAsPropertyOrCommentIfNotNumber(resultFromBorrowingRequestApi, digitizationRequestBody, comment, 'volume');
         comment = DigitizationRequestCreater.addValueAsPropertyOrCommentIfNotNumber(resultFromBorrowingRequestApi, digitizationRequestBody, comment, 'issue');
@@ -33,14 +33,14 @@ export class DigitizationRequestCreater {
         return digitizationRequestBody;
     }
 
-    private handlePages(comment: string, resultFromBorrowingRequestApi: any, digitizationRequestBody) {
+    private static handlePages(comment: string, resultFromBorrowingRequestApi: any, digitizationRequestBody) {
         comment = DigitizationRequestCreater.addValueAsCommentIfNotEmpty(resultFromBorrowingRequestApi, comment, 'pages');
         return DigitizationRequestCreater.setRequiredPagesOrAddToCommentIfNotNumbers(digitizationRequestBody, resultFromBorrowingRequestApi, comment);
     }
 
     private static addValueAsPropertyOrCommentIfNotNumber(resultFromBorrowingRequestApi: any, digitizationRequestBody, comment: string, propertyName:string):string {
         const propertyValue = resultFromBorrowingRequestApi[propertyName];
-        if (typeof propertyValue === 'number') {
+        if (this.isNumber(propertyValue)) {
             DigitizationRequestCreater.addProperty(digitizationRequestBody, propertyName, propertyValue);
         } else {
             DigitizationRequestCreater.addProperty(digitizationRequestBody, propertyName, '');
@@ -61,7 +61,7 @@ export class DigitizationRequestCreater {
         const startPageValue = resultFromBorrowingRequestApi['start_page'];
         const endPageValue = resultFromBorrowingRequestApi['end_page'];
         var requiredPageRangeObject;
-        if (typeof startPageValue === 'number' && typeof endPageValue === 'number' ) {
+        if (this.isNumber(startPageValue) && this.isNumber(endPageValue)) {
             requiredPageRangeObject = {
                 from_page: resultFromBorrowingRequestApi['start_page'],
                 to_page: resultFromBorrowingRequestApi['end_page']
@@ -76,6 +76,10 @@ export class DigitizationRequestCreater {
         var requiredPageRangeArray = [requiredPageRangeObject];
         DigitizationRequestCreater.addProperty(digitizationRequestBody, "required_pages_range", requiredPageRangeArray);
         return comment;
+    }
+
+    private static isNumber(value:string):boolean {
+        return !isNaN(Number(value));
     }
 
     private static setTargetDestination(digitizationRequestBody) {

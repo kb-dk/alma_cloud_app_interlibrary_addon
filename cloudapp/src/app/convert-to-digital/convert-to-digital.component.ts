@@ -352,6 +352,8 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
     this.deleteRequestOk = true;
     this.loading = false;
     this.createAlertMessage('BorrowingRequest is converted. Id of Digitization Request is: ' + this.idOfCreatedDigitizationRequest + '.', 'success');
+    this.addToUserGuideText('');//space
+    this.addToUserGuideText('NB: Some of the attributes from the Borrowing Request may be found in the "Note" of the Patron digitization request!')
     this.idOfCreatedDigitizationRequest = '';
     console.log('BorrowingRequest is converted and deleted(): ', 'BorrowingRequest is converted.');
     this.readyToChangeRequestType = false;//shortcut for disabling "Convert to digitization request"-button without creating alert-message.
@@ -420,8 +422,8 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
       if (this.createDigitizationOk) {//no error
         this.addToUserGuideText("Processing Borrowing Request...");
         const selectedBorrowingRequestId = this.getResultFromBorrowingRequestApi()['request_id'];
-        // const paramString = '?remove_request=false&notify_user=false';//Not in use, at the moment.
-        const paramString = '?remove_request=true&notify_user=false';//Not in use, at the moment.
+        const paramString = '?remove_request=false&notify_user=false';//Not in use, at the moment.
+        // const paramString = '?remove_request=true&notify_user=false';//Not in use, at the moment.
         const url: any = '/almaws/v1/users/' + this.digitizationFields.getUserId() + '/resource-sharing-requests/' + selectedBorrowingRequestId+paramString;
         //delete the old request
         this.sendDeleteRequest(url);
