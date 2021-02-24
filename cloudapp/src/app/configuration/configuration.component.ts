@@ -108,7 +108,7 @@ ngOnInit(): void {
         await this.delay(1000);
       }
       if (this.savedOk) {//no error
-        this.toastr.success('Item policy: ' + this.newItemPolicy + ' is now valid for digitization.', 'item policy saved' , {timeOut:this.toastTimeOut});
+        this.toastr.success('Item policy: ' + this.newItemPolicy + ' is now valid for digitization.', 'Item policy saved' , {timeOut:this.toastTimeOut});
         this.newItemPolicy = '';
       } else {
         this.toastr.error('Failed updating configuration', 'Error', {timeOut:this.toastTimeOut});

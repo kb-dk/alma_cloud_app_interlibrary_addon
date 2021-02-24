@@ -4,7 +4,7 @@ This Cloud App is adding features to help handling Borrowing Request activities 
 
 ##1. "External localization"
 
-####In connection with fullfilling borrowning requests from users, librarians may need to search for materials from partners or library cooperatives.
+####In connection with fulfilling borrowning requests from users, librarians may need to search for materials from partners or library cooperatives.
 The "External localization" part of Interlibrary Add-on provides functionality to create personal templates in order to automate these searches.   
 
 #### How to use "External localization"
