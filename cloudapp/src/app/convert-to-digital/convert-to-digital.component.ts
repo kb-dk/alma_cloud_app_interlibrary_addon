@@ -74,7 +74,7 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
   private updateReadyToChange() {
     this.readyToChangeRequestType = this.borrowingRequestIsChangeable && this.itemLocationIsValid && this.digitizationFields.allFieldsAreSet();
     if(this.readyToChangeRequestType) {
-      this.createAlertMessage('Use this item from location (' + this.locationCodeOfSelectedItem +')? Press "Convert to digitization request".', 'info');
+      this.createAlertMessage('Use this item (from location ' + this.locationCodeOfSelectedItem +')? Press "Convert to digitization request".', 'info');
     } else if (this.digitizationFields.allFieldsAreSet()) {
       if(this.useLocationCodesForItemValidation) {
         this.createAlertMessage('Location of the selected item (' + this.locationCodeOfSelectedItem + ') is not valid for digitization requests. The location can be added by the General Administrator.', 'error');
