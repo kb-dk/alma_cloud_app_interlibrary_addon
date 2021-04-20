@@ -29,7 +29,8 @@ constructor(private restService: CloudAppRestService){
         const title:string = this.cleanInput(almaData.title);
         const isbn:string =  this.cleanInput(almaData.isbn);
         const author:string = this.cleanInput(almaData.author);
-        return new ExternalLinkAttributesImpl(index, title, isbn, author);
+        const issn:string = this.cleanInput(almaData.issn);
+        return new ExternalLinkAttributesImpl(index, title, isbn, author, issn);
     };
 
     private cleanInput = (almaAttribute) => {

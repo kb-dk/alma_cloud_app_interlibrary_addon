@@ -68,5 +68,4 @@ export class ExternalLocalizationComponent implements OnInit, OnDestroy {
     return (this.settings && this.settings.externalLinkTemplates && this.settings.externalLinkTemplates.length > 0);
   }
 
-
 }

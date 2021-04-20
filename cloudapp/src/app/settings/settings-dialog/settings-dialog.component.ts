@@ -32,6 +32,7 @@ export class SettingsDialogComponent implements OnInit {
     const titleTestValue = 'Aesthetics, disinterestedness and effectiveness in political art.';
     const isbnTestValue = '0415232813';
     const authorTestValue = 'H.C.Andersen';
+    const issnTestValue = '0106-9470';
     let testSearchValue: string;
     switch (+this.data.searchCriteriaType) {
       case SearchCriteriaType.ISBN:
@@ -42,6 +43,9 @@ export class SettingsDialogComponent implements OnInit {
         break;
       case SearchCriteriaType.AUTHOR:
         testSearchValue = authorTestValue;
+        break;
+      case SearchCriteriaType.ISSN:
+        testSearchValue = issnTestValue;
         break;
       default:
         break;

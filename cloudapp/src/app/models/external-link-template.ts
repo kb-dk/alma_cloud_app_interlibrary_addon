@@ -28,5 +28,6 @@ export enum SearchCriteriaType {
     NONE = 0,
     ISBN = 1,
     TITLE = 2,
-    AUTHOR = 3
+    AUTHOR = 3,
+    ISSN = 4
 }

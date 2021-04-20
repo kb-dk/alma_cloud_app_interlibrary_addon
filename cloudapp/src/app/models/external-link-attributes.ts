@@ -4,6 +4,7 @@ export interface ExternalLinkAttributes {
     title: string;
     isbn: string;
     author: string;
+    issn: string;
 }
 
 export class  ExternalLinkAttributesImpl implements  ExternalLinkAttributes{
@@ -11,12 +12,14 @@ export class  ExternalLinkAttributesImpl implements  ExternalLinkAttributes{
     isbn: string;
     title: string;
     author: string;
+    issn: string;
 
-    constructor(index: number, title?:string, isbn?:string, author?:string) {
+    constructor(index: number, title?:string, isbn?:string, author?:string, issn?:string) {
         this.id = index+1;
         this.title = title || '';
         this.isbn = isbn || '';
         this.author = author || '';
+        this.issn = issn || '';
     }
 
     public getEncodedTitle():string {
@@ -28,6 +31,7 @@ export class  ExternalLinkAttributesImpl implements  ExternalLinkAttributes{
             + ' title: |' + this.title +'|'
             + ' isbn: ' + this.isbn
             + ' author ' + this.author
+            + ' issn ' + this.issn
             ;
     }
 }
