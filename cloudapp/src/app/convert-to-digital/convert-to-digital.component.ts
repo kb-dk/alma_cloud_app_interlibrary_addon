@@ -54,7 +54,6 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
   private idOfCreatedDigitizationRequest: string = '';
   private useLocationCodesForItemValidation: boolean = false;
 
-
   constructor(private appService: AppService,
               private restService: CloudAppRestService,
               private eventsService: CloudAppEventsService,

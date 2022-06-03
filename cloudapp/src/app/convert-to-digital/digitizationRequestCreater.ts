@@ -14,6 +14,7 @@ export class DigitizationRequestCreater {
     public createDigitizationRequestBody(digitizationFields:DigitizationFields, resultFromBorrowingRequestApi:any, resultFromUserRequestApi:any) {
         var digitizationRequestBody = Object.create(null);
         var comment:string = '';
+        console.log('resultFromBorrowingRequestApi: ' + JSON.stringify(resultFromBorrowingRequestApi));
         comment = DigitizationRequestCreater.startCommentWithExtraInfo(resultFromBorrowingRequestApi, comment)
         DigitizationRequestCreater.addProperty(digitizationRequestBody, "user_primary_id", resultFromBorrowingRequestApi['requester']['value']);
         DigitizationRequestCreater.setLastInterestDate(digitizationRequestBody, resultFromBorrowingRequestApi);
@@ -29,7 +30,7 @@ export class DigitizationRequestCreater {
         DigitizationRequestCreater.addProperty(digitizationRequestBody, "date_of_publication", resultFromBorrowingRequestApi['year']);
         comment = DigitizationRequestCreater.addValueAsPropertyOrCommentIfNotNumber(resultFromBorrowingRequestApi, digitizationRequestBody, comment, 'volume');
         comment = DigitizationRequestCreater.addValueAsPropertyOrCommentIfNotNumber(resultFromBorrowingRequestApi, digitizationRequestBody, comment, 'issue');
-        DigitizationRequestCreater.endCommentWithExtraInfo(digitizationRequestBody, resultFromUserRequestApi, comment);
+        DigitizationRequestCreater.endCommentWithExtraInfo(digitizationRequestBody, resultFromBorrowingRequestApi, comment);
         return digitizationRequestBody;
     }
 
@@ -108,9 +109,10 @@ export class DigitizationRequestCreater {
         return comment.concat(cloudAppPrefix).concat(' Publisher: ').concat(publisher).concat('  Edition: ').concat(edition);
     }
 
-    private static endCommentWithExtraInfo(digitizationRequest, resultFromUserRequestApi, comment:string) {
-        var originalComment = resultFromUserRequestApi['comment']==null ? '' : resultFromUserRequestApi['comment'];
+    private static endCommentWithExtraInfo(digitizationRequest, resultFromBorrowingRequestApi, comment:string) {
+        var originalComment = resultFromBorrowingRequestApi['bib_note']==null ? '' : resultFromBorrowingRequestApi['bib_note'];
         comment = comment.concat(' Usercomment: ').concat(originalComment);
+        console.log ("comment 1: " + comment);
         DigitizationRequestCreater.addProperty(digitizationRequest, 'comment', comment);
     }
 
