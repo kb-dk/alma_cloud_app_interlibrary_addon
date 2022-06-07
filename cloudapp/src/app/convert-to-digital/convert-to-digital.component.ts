@@ -434,7 +434,7 @@ export class ConvertToDigitalComponent implements OnInit, OnDestroy {
 
   private createDigitizationRequest() {
     const url = this.digitizationRequestCreater.createUrl(this.digitizationFields);
-    const requestBody = {...this.digitizationRequestCreater.createDigitizationRequestBody(this.digitizationFields, this.getResultFromBorrowingRequestApi(), this.getResultFromUserRequestApi())};
+    const requestBody = {...this.digitizationRequestCreater.createDigitizationRequestBody(this.digitizationFields, this.getResultFromBorrowingRequestApi())};
     return {requestBody, url};
   }
 

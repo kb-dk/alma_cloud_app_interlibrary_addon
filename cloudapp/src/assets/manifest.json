@@ -1,9 +1,9 @@
 {
    "id": "interlibrary-add-on",
    "title": "Interlibrary Add-on",
-   "description": "NEW: Convert Borrowing Request to digitization in a few clicks. Still has: templates for external localization of Borrowing Request materials..",
-   "subtitle": "NEW: Convert Borrowing Request to digitization in a few clicks. Still has: templates for external localization of Borrowing Request materials..",
+   "subtitle": "Convert Borrowing Request to digitization in a few clicks. Also: templates for external localization of Borrowing Request materials..",
    "author": "Royal Danish Library, Denmark",
+   "description": "NEW: Convert Borrowing Request to digitization in a few clicks. Still has: templates for external localization of Borrowing Request materials..",
    "pages": {
       "settings": "/#/settings",
       "config": "/#/config"

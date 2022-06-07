@@ -2,7 +2,7 @@ import {CUSTOM_ELEMENTS_SCHEMA, NgModule} from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
 import { BrowserModule, Title } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { MaterialModule, getTranslateModule, AlertModule } from '@exlibris/exl-cloudapp-angular-lib';
+import { MaterialModule, CloudAppTranslateModule, AlertModule } from '@exlibris/exl-cloudapp-angular-lib';
 import { ToastrModule } from 'ngx-toastr';
 
 import { AppComponent } from './app.component';
@@ -18,7 +18,6 @@ import { SettingsDialogComponent } from './settings/settings-dialog/settings-dia
 import { MultiSelectComponent } from './multi-select/multi-select.component';
 import { SelectEntitiesComponent} from "./multi-select/select-entities/select-entities.component";
 import { ConvertToDigitalComponent } from './convert-to-digital/convert-to-digital.component';
-import { AlertService } from '@exlibris/exl-cloudapp-angular-lib';
 import { ConfigurationComponent } from './configuration/configuration.component';
 
 
@@ -54,7 +53,7 @@ export function getToastrModule() {
     HttpClientModule,
     FormsModule,
     ReactiveFormsModule,
-    getTranslateModule(),
+    CloudAppTranslateModule.forRoot(),
     getToastrModule(),
     AlertModule,
   ],

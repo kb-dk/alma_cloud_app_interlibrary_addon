@@ -6,15 +6,13 @@ export class DigitizationRequestCreater {
     public createUrl(digitizationFields:DigitizationFields) {
         var paramString = "?user_id_type=all_unique&mms_id=" + digitizationFields.getMmsId() + "&item_pid=" + digitizationFields.getItemId();
         const url: any = '/almaws/v1/users/' + digitizationFields.getUserId() + '/requests' + paramString;
-        console.log('url(createUrl): ', url);
         return url;
     }
 
 
-    public createDigitizationRequestBody(digitizationFields:DigitizationFields, resultFromBorrowingRequestApi:any, resultFromUserRequestApi:any) {
+    public createDigitizationRequestBody(digitizationFields:DigitizationFields, resultFromBorrowingRequestApi:any) {
         var digitizationRequestBody = Object.create(null);
         var comment:string = '';
-        console.log('resultFromBorrowingRequestApi: ' + JSON.stringify(resultFromBorrowingRequestApi));
         comment = DigitizationRequestCreater.startCommentWithExtraInfo(resultFromBorrowingRequestApi, comment)
         DigitizationRequestCreater.addProperty(digitizationRequestBody, "user_primary_id", resultFromBorrowingRequestApi['requester']['value']);
         DigitizationRequestCreater.setLastInterestDate(digitizationRequestBody, resultFromBorrowingRequestApi);
@@ -28,6 +26,7 @@ export class DigitizationRequestCreater {
         DigitizationRequestCreater.addProperty(digitizationRequestBody, 'chapter_or_article_author', resultFromBorrowingRequestApi['author']);
         comment = DigitizationRequestCreater.handlePages(comment, resultFromBorrowingRequestApi, digitizationRequestBody);
         DigitizationRequestCreater.addProperty(digitizationRequestBody, "date_of_publication", resultFromBorrowingRequestApi['year']);
+        comment = DigitizationRequestCreater.addValueAsCommentIfNotEmpty(resultFromBorrowingRequestApi, comment, 'year');
         comment = DigitizationRequestCreater.addValueAsPropertyOrCommentIfNotNumber(resultFromBorrowingRequestApi, digitizationRequestBody, comment, 'volume');
         comment = DigitizationRequestCreater.addValueAsPropertyOrCommentIfNotNumber(resultFromBorrowingRequestApi, digitizationRequestBody, comment, 'issue');
         DigitizationRequestCreater.endCommentWithExtraInfo(digitizationRequestBody, resultFromBorrowingRequestApi, comment);
@@ -112,7 +111,6 @@ export class DigitizationRequestCreater {
     private static endCommentWithExtraInfo(digitizationRequest, resultFromBorrowingRequestApi, comment:string) {
         var originalComment = resultFromBorrowingRequestApi['bib_note']==null ? '' : resultFromBorrowingRequestApi['bib_note'];
         comment = comment.concat(' Usercomment: ').concat(originalComment);
-        console.log ("comment 1: " + comment);
         DigitizationRequestCreater.addProperty(digitizationRequest, 'comment', comment);
     }
 
