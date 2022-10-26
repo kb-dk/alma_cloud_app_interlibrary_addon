@@ -24,10 +24,10 @@
                 <div [ngClass]="'table-cell'"></div>
                 <div [ngClass]="'table-cell'">
                 <span *ngFor="let item of settings.externalLinkTemplates">
-                  <a matTooltip="ISBN: {{externalLinkAttribute.isbn}}" matTooltipShowDelay="1500" *ngIf="(externalLinkAttribute.isbn!='') && (item.searchCriteriaType=='1')" target="externalLocalization" href="{{item.startOfLink}}+{{externalLinkAttribute.isbn}}+{{item.endOfLink}}">{{item.linkName}}</a>
-                  <a matTooltip="Title: {{externalLinkAttribute.title}}" matTooltipShowDelay="1500" *ngIf="(externalLinkAttribute.title!='') && (item.searchCriteriaType=='2')" target="externalLocalization" href="{{item.startOfLink}}+{{externalLinkAttribute.getEncodedTitle()}}+{{item.endOfLink}}">{{item.linkName}}</a>
-                  <a matTooltip="Author: {{externalLinkAttribute.author}}" matTooltipShowDelay="1500" *ngIf="(externalLinkAttribute.author!='') && (item.searchCriteriaType=='3')" target="externalLocalization" href="{{item.startOfLink}}+{{externalLinkAttribute.author}}+{{item.endOfLink}}">{{item.linkName}}</a>
-                  <a matTooltip="ISSN: {{externalLinkAttribute.issn}}" matTooltipShowDelay="1500" *ngIf="(externalLinkAttribute.issn!='') && (item.searchCriteriaType=='4')" target="externalLocalization" href="{{item.startOfLink}}+{{externalLinkAttribute.issn}}+{{item.endOfLink}}">{{item.linkName}}</a>
+                  <a matTooltip="ISBN: {{externalLinkAttribute.isbn}}" matTooltipShowDelay="1500" *ngIf="(externalLinkAttribute.isbn!='') && (item.searchCriteriaType=='1')" target="_blank" href="{{item.startOfLink}}+{{externalLinkAttribute.isbn}}+{{item.endOfLink}}">{{item.linkName}}</a>
+                  <a matTooltip="Title: {{externalLinkAttribute.title}}" matTooltipShowDelay="1500" *ngIf="(externalLinkAttribute.title!='') && (item.searchCriteriaType=='2')" target="_blank" href="{{item.startOfLink}}+{{externalLinkAttribute.getEncodedTitle()}}+{{item.endOfLink}}">{{item.linkName}}</a>
+                  <a matTooltip="Author: {{externalLinkAttribute.author}}" matTooltipShowDelay="1500" *ngIf="(externalLinkAttribute.author!='') && (item.searchCriteriaType=='3')" target="_blank" href="{{item.startOfLink}}+{{externalLinkAttribute.author}}+{{item.endOfLink}}">{{item.linkName}}</a>
+                  <a matTooltip="ISSN: {{externalLinkAttribute.issn}}" matTooltipShowDelay="1500" *ngIf="(externalLinkAttribute.issn!='') && (item.searchCriteriaType=='4')" target="_blank" href="{{item.startOfLink}}+{{externalLinkAttribute.issn}}+{{item.endOfLink}}">{{item.linkName}}</a>
                 </span>
                 </div>
             </div>
